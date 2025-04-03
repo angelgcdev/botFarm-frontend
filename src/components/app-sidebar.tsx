@@ -14,7 +14,7 @@ import { FacebookIcon } from "@/components/icons/facebook-icon";
 import { CalendarIcon } from "@/components/icons/calendar-icon";
 
 import { NavDocuments } from "./nav-documents";
-import { NavSecondary } from "./nav-secondary";
+// import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 import {
   Sidebar,
@@ -26,6 +26,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { CollapsibleNavMain } from "./collapsible-nav-main";
+import Link from "next/link";
+import { ModeToggle } from "./mode-toggle";
 
 const data = {
   user: {
@@ -34,38 +36,38 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    {
-      title: "Redes Sociales",
-      url: "#",
-      icon: GlobeIcon,
-      children: [
-        {
-          title: "TikTok",
-          url: "#",
-          icon: TikTokIcon,
-        },
-        {
-          title: "Facebook",
-          url: "#",
-          icon: FacebookIcon,
-        },
-      ],
-    },
+    // {
+    //   title: "Redes Sociales",
+    //   url: "#",
+    //   icon: GlobeIcon,
+    //   children: [
+    //     {
+    //       title: "TikTok",
+    //       url: "#",
+    //       icon: TikTokIcon,
+    //     },
+    //     {
+    //       title: "Facebook",
+    //       url: "#",
+    //       icon: FacebookIcon,
+    //     },
+    //   ],
+    // },
     {
       title: "Programar Interacciones",
-      url: "#",
+      url: "/main/schedule-posts",
       icon: CalendarIcon,
       isActive: true,
     },
     {
-      title: "Historial",
-      url: "#",
-      icon: ClockIcon,
+      title: "Dispositivos",
+      url: "/main/devices",
+      icon: SmartphoneIcon,
     },
     {
-      title: "Dispositivos",
-      url: "#",
-      icon: SmartphoneIcon,
+      title: "Historial",
+      url: "/main/history",
+      icon: ClockIcon,
     },
   ],
   navSecondary: [
@@ -76,7 +78,7 @@ const data = {
     },
     {
       title: "Cerrar Sesión",
-      url: "#",
+      url: "/login",
       icon: LogOutIcon,
     },
   ],
@@ -104,18 +106,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <Link href="/main">
                 <ArrowUpCircleIcon className="h-5 w-5" />
                 <span className="text-base font-semibold">
                   Bots Redes Sociales
                 </span>
-              </a>
+              </Link>
             </SidebarMenuButton>
+            <ModeToggle />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

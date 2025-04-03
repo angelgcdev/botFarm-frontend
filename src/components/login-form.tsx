@@ -45,7 +45,7 @@ export function LoginForm({
     const token = Cookies.get("access_token");
     if (token) {
       console.log("Token encontrado:", token);
-      router.push("/dashboard"); //Redirige si ya esta autenticado
+      router.push("/main/dashboard"); //Redirige si ya esta autenticado
     }
   }, []);
 
@@ -63,7 +63,7 @@ export function LoginForm({
           path: "/",
         }); //expira en 1 hora
         //Redirige al dashboard
-        router.push("/dashboard");
+        router.push("/main/dashboard");
       } else {
         console.error("Login fallido", resData.message);
       }

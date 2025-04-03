@@ -14,5 +14,5 @@ export function middleware(req: NextRequest) {
 
 //Rutas protegidas
 export const config = {
-  matcher: ["/dashboard"], //Puedes agregar mas rutas protegidas
+  matcher: ["/main/:path*"], //Puedes agregar mas rutas protegidas
 };

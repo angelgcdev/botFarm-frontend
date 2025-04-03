@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { ChevronDown, ChartSpline, type LucideIcon } from "lucide-react";
 
@@ -19,6 +20,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import Link from "next/link";
 
 type NavItemWithChildren = {
   title: string;
@@ -42,12 +44,17 @@ export function CollapsibleNavMain({
 }) {
   const [openItems, setOpenItems] = React.useState<Record<string, boolean>>({});
 
+  const router = useRouter();
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
+              onClick={() => {
+                router.push("/main/dashboard");
+              }}
               tooltip="Quick Create"
               className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground "
             >
@@ -55,6 +62,9 @@ export function CollapsibleNavMain({
               <span>Dashboard</span>
             </SidebarMenuButton>
             <Button
+              onClick={() => {
+                router.push("/main/dashboard");
+              }}
               size="icon"
               className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
               variant="outline"
@@ -113,13 +123,15 @@ export function CollapsibleNavMain({
                 </Collapsible>
               ) : (
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    isActive={item.isActive}
-                  >
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
+                  <Link href={item.url}>
+                    <SidebarMenuButton
+                      className="focus:bg-gray-700"
+                      tooltip={item.title}
+                    >
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
               )}
             </React.Fragment>
