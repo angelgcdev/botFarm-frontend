@@ -1,9 +1,15 @@
-import { TrendingDownIcon, TrendingUpIcon } from "lucide-react"
-import { TikTokIcon } from "./icons/tiktok-icon"
-import { FacebookIcon } from "./icons/facebook-icon"
+import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
+import { TikTokIcon } from "../../icons/tiktok-icon";
+import { FacebookIcon } from "../../icons/facebook-icon";
 
-import { Badge } from "@/components/ui/badge"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export function SectionCards() {
   return (
@@ -11,9 +17,14 @@ export function SectionCards() {
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>Interacciones Programadas</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">5,230</CardTitle>
+          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+            5,230
+          </CardTitle>
           <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs text-green-600">
+            <Badge
+              variant="outline"
+              className="flex gap-1 rounded-lg text-xs text-green-600"
+            >
               <TrendingUpIcon className="size-3" />
               +12%
             </Badge>
@@ -21,17 +32,25 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Acciones programadas esta semana <TrendingUpIcon className="size-4 text-green-600" />
+            Acciones programadas esta semana{" "}
+            <TrendingUpIcon className="size-4 text-green-600" />
           </div>
-          <div className="text-muted-foreground">Crecimiento constante en ambas plataformas</div>
+          <div className="text-muted-foreground">
+            Crecimiento constante en ambas plataformas
+          </div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>Vistas Generadas</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">150,000</CardTitle>
+          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+            150,000
+          </CardTitle>
           <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs text-green-600">
+            <Badge
+              variant="outline"
+              className="flex gap-1 rounded-lg text-xs text-green-600"
+            >
               <TrendingUpIcon className="size-3" />
               +8.5%
             </Badge>
@@ -41,15 +60,22 @@ export function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             Vistas totales en videos de TikTok <TikTokIcon className="size-4" />
           </div>
-          <div className="text-muted-foreground">Aumento significativo este mes</div>
+          <div className="text-muted-foreground">
+            Aumento significativo este mes
+          </div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>Dispositivos Conectados</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">15</CardTitle>
+          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+            15
+          </CardTitle>
           <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs text-red-600">
+            <Badge
+              variant="outline"
+              className="flex gap-1 rounded-lg text-xs text-red-600"
+            >
               <TrendingDownIcon className="size-3" />
               -3%
             </Badge>
@@ -57,17 +83,25 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Móviles conectados vía USB <TrendingDownIcon className="size-4 text-red-600" />
+            Móviles conectados vía USB{" "}
+            <TrendingDownIcon className="size-4 text-red-600" />
           </div>
-          <div className="text-muted-foreground">Ligera disminución esta semana</div>
+          <div className="text-muted-foreground">
+            Ligera disminución esta semana
+          </div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>Comentarios Añadidos</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">2,450</CardTitle>
+          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+            2,450
+          </CardTitle>
           <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs text-green-600">
+            <Badge
+              variant="outline"
+              className="flex gap-1 rounded-lg text-xs text-green-600"
+            >
               <TrendingUpIcon className="size-3" />
               +5%
             </Badge>
@@ -75,12 +109,14 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Comentarios programados en publicaciones <FacebookIcon className="size-4 text-blue-600" />
+            Comentarios programados en publicaciones{" "}
+            <FacebookIcon className="size-4 text-blue-600" />
           </div>
-          <div className="text-muted-foreground">Principalmente en Facebook</div>
+          <div className="text-muted-foreground">
+            Principalmente en Facebook
+          </div>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-

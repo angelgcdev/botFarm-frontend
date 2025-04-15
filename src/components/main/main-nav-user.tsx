@@ -2,13 +2,7 @@
 
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import {
-  BellIcon,
-  CreditCardIcon,
-  LogOutIcon,
-  MoreVerticalIcon,
-  UserCircleIcon,
-} from "lucide-react";
+import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -27,7 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export function NavUser({
+export function MainNavUser({
   user,
 }: {
   user: {
@@ -41,6 +35,8 @@ export function NavUser({
   const router = useRouter();
   const handleLogout = () => {
     Cookies.remove("access_token", { path: "/" });
+    Cookies.remove("usuario_id", { path: "/" });
+
     router.push("/login");
   };
 

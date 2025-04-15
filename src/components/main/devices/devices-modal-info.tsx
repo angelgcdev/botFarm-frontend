@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "../../ui/dialog";
 import { DeviceForm } from "./device-form";
 
 interface ModalDeviceInfoProps {

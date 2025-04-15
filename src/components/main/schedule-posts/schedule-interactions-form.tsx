@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { TikTokIcon } from "./icons/tiktok-icon";
-import { FacebookIcon } from "./icons/facebook-icon";
+import { TikTokIcon } from "../../icons/tiktok-icon";
+import { FacebookIcon } from "../../icons/facebook-icon";
 import { Check, ChevronDown, ChevronUp, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,9 +26,15 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import socket from "@/lib/socket";
 
 // Mock data for Facebook groups
 const facebookGroups = [
@@ -49,6 +55,11 @@ const connectedDevices = [
 ];
 
 export function ScheduleInteractionsForm() {
+  const { register, handleSubmit } = useForm();
+
+  const [mensaje, setMensaje] = useState("");
+  // const [device, setDevice] = useState("");
+
   const [activeTab, setActiveTab] = React.useState("tiktok");
   const [addComment, setAddComment] = React.useState(false);
   const [selectedGroups, setSelectedGroups] = React.useState<string[]>([]);
@@ -56,13 +67,35 @@ export function ScheduleInteractionsForm() {
   const [selectedDevices, setSelectedDevices] = React.useState<string[]>([]);
   const [showDeviceList, setShowDeviceList] = React.useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // //Escuchar dispositivos conectados
+  // React.useEffect(() => {
+  //   const handleDeviceConnected = (data) => {
+  //     console.log("Dispositivo conectado:", data);
+  //     setDevice(data);
+  //     toast.info(data);
+  //   };
+
+  //   socket.on("device_connected_notification", handleDeviceConnected);
+
+  //   return () => {
+  //     socket.off("device_connected_notification", handleDeviceConnected);
+  //   };
+  // }, []);
+
+  const onSubmit = (data: any) => {
     toast.success(
       `Interacción de ${
         activeTab === "tiktok" ? "TikTok" : "Facebook"
       } programada correctamente`
     );
+
+    console.log(data);
+
+    console.log("enviando datos a socket io... ");
+    setMensaje("Hola desde nextjs");
+    socket.emit("mensaje", mensaje);
+
+    socket.emit("programar-automatizacion", data);
   };
 
   const toggleGroupSelection = (groupId: string) => {
@@ -106,13 +139,14 @@ export function ScheduleInteractionsForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="tiktok-url">URL del Video</Label>
+                  <Label htmlFor="url-video">URL del Video</Label>
                   <Input
-                    id="tiktok-url"
+                    id="url-video"
                     placeholder="https://tiktok.com/@usuario/video/123456789"
+                    {...register("url_video")}
                   />
                 </div>
 
@@ -168,6 +202,7 @@ export function ScheduleInteractionsForm() {
                     type="number"
                     min="0"
                     placeholder="1000"
+                    {...register("num_views")}
                   />
                 </div>
 
@@ -217,7 +252,7 @@ export function ScheduleInteractionsForm() {
           </CardContent>
           <CardFooter className="flex justify-end">
             <Button
-              onClick={handleSubmit}
+              onClick={handleSubmit(onSubmit)}
               className="bg-black hover:bg-black/40 text-white"
             >
               Programar Interacción
@@ -238,7 +273,7 @@ export function ScheduleInteractionsForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="facebook-url">URL de la Publicación</Label>
@@ -472,7 +507,7 @@ export function ScheduleInteractionsForm() {
           </CardContent>
           <CardFooter className="flex justify-end">
             <Button
-              onClick={handleSubmit}
+              // onClick={handleSubmit}
               className="bg-[#1877F2] hover:bg-[#1877F2]/80"
             >
               Programar Interacción
@@ -480,6 +515,7 @@ export function ScheduleInteractionsForm() {
           </CardFooter>
         </Card>
       </TabsContent>
+      <Toaster />
     </Tabs>
   );
 }

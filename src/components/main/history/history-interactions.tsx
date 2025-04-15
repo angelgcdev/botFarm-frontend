@@ -70,7 +70,7 @@ const historyData = [
   },
 ];
 
-export function InteractionsHistory() {
+export function HistoryInteractions() {
   return (
     <Card className="w-full">
       <CardHeader>

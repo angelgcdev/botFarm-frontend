@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
-import { ModalDeviceInfo } from "./modal-device-info";
+import { ModalDeviceInfo } from "./devices-modal-info";
 
 export function CardDeviceInfo() {
   return (

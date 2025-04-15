@@ -1,4 +1,4 @@
-import { CardDeviceInfo } from "@/components/card-device-info";
+import { CardDeviceInfo } from "@/components/main/devices/devices-card-info";
 import React from "react";
 
 const DevicesPage = () => {

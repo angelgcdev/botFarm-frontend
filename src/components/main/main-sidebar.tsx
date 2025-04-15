@@ -4,7 +4,6 @@ import type * as React from "react";
 import {
   ArrowUpCircleIcon,
   ClockIcon,
-  GlobeIcon,
   LogOutIcon,
   SmartphoneIcon,
   UserIcon,
@@ -13,9 +12,9 @@ import { TikTokIcon } from "@/components/icons/tiktok-icon";
 import { FacebookIcon } from "@/components/icons/facebook-icon";
 import { CalendarIcon } from "@/components/icons/calendar-icon";
 
-import { NavDocuments } from "./nav-documents";
+import { MainNavDocuments } from "./main-nav-documents";
 // import { NavSecondary } from "./nav-secondary";
-import { NavUser } from "./nav-user";
+import { MainNavUser } from "./main-nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -25,9 +24,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { CollapsibleNavMain } from "./collapsible-nav-main";
+import { CollapsibleNavMain } from "./main-collapsible-nav";
 import Link from "next/link";
-import { ModeToggle } from "./mode-toggle";
+import { ModeToggle } from "../mode-toggle";
 
 const data = {
   user: {
@@ -101,7 +100,9 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function MainSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -124,11 +125,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <CollapsibleNavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+        <MainNavDocuments items={data.documents} />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <MainNavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>
   );

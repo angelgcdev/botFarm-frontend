@@ -1,9 +1,9 @@
-import { InteractionsHistory } from "@/components/interactions-history";
+import { HistoryInteractions } from "@/components/main/history/history-interactions";
 
 const HistoryPage = () => {
   return (
     <div className="px-4 lg:px-6">
-      <InteractionsHistory />
+      <HistoryInteractions />
     </div>
   );
 };

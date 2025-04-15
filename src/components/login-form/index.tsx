@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/app/login/login.api";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 interface IFormInput {
   email: string;
@@ -55,13 +56,22 @@ export function LoginForm({
       const res = await login(data);
       const resData = await res.json();
 
+      console.log("datossss: ", resData);
+
       //Verificar si el login fue exitoso
       if (res.ok && resData.access_token) {
         //Guarda el token en una cooke con js-cookie
         Cookies.set("access_token", resData.access_token, {
-          expires: 1 / 24,
+          expires: 2 / 24,
           path: "/",
         }); //expira en 1 hora
+
+        //Guardar el ID del usuario
+        Cookies.set("usuario_id", resData.id, {
+          expires: 2 / 24,
+          path: "/",
+        });
+
         //Redirige al dashboard
         router.push("/main/dashboard");
       } else {
@@ -120,8 +130,14 @@ export function LoginForm({
             </span>
           )}
         </div>
-        <Button type="submit" className="w-full">
-          {isSubmitting ? "Cargando..." : "Iniciar Sesión"}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin" /> Espere por favor
+            </>
+          ) : (
+            "Iniciar Sesión"
+          )}
         </Button>
       </div>
       <div className="text-center text-sm">

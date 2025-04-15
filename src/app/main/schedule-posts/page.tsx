@@ -1,4 +1,4 @@
-import { ScheduleInteractionsForm } from "@/components/schedule-interactions-form";
+import { ScheduleInteractionsForm } from "@/components/main/schedule-posts/schedule-interactions-form";
 
 const ProgramarInteracciones = () => {
   return (
