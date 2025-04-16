@@ -56,8 +56,6 @@ export function LoginForm({
       const res = await login(data);
       const resData = await res.json();
 
-      console.log("datossss: ", resData);
-
       //Verificar si el login fue exitoso
       if (res.ok && resData.access_token) {
         //Guarda el token en una cooke con js-cookie

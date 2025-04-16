@@ -57,30 +57,12 @@ const connectedDevices = [
 export function ScheduleInteractionsForm() {
   const { register, handleSubmit } = useForm();
 
-  const [mensaje, setMensaje] = useState("");
-  // const [device, setDevice] = useState("");
-
   const [activeTab, setActiveTab] = React.useState("tiktok");
   const [addComment, setAddComment] = React.useState(false);
   const [selectedGroups, setSelectedGroups] = React.useState<string[]>([]);
   const [showGroupList, setShowGroupList] = React.useState(false);
   const [selectedDevices, setSelectedDevices] = React.useState<string[]>([]);
   const [showDeviceList, setShowDeviceList] = React.useState(false);
-
-  // //Escuchar dispositivos conectados
-  // React.useEffect(() => {
-  //   const handleDeviceConnected = (data) => {
-  //     console.log("Dispositivo conectado:", data);
-  //     setDevice(data);
-  //     toast.info(data);
-  //   };
-
-  //   socket.on("device_connected_notification", handleDeviceConnected);
-
-  //   return () => {
-  //     socket.off("device_connected_notification", handleDeviceConnected);
-  //   };
-  // }, []);
 
   const onSubmit = (data: any) => {
     toast.success(
@@ -92,8 +74,6 @@ export function ScheduleInteractionsForm() {
     console.log(data);
 
     console.log("enviando datos a socket io... ");
-    setMensaje("Hola desde nextjs");
-    socket.emit("mensaje", mensaje);
 
     socket.emit("programar-automatizacion", data);
   };
