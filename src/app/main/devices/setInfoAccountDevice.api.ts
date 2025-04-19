@@ -5,8 +5,8 @@ interface IFormInput {
   password: string;
 }
 
-const login = async (data: IFormInput) => {
-  const res = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/auth/login`, {
+const setInfoAccountDevice = async (data: IFormInput) => {
+  const res = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/devices`, {
     method: "POST",
     credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
     headers: {
@@ -18,4 +18,4 @@ const login = async (data: IFormInput) => {
   return res;
 };
 
-export { login };
+export { setInfoAccountDevice };

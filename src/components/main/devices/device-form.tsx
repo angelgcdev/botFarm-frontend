@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "../../ui/input";
+import { setInfoAccountDevice } from "@/app/main/devices/setInfoAccountDevice.api";
 
 const items = [
   {
@@ -39,7 +40,11 @@ const FormSchema = z.object({
   }),
 });
 
-export function DeviceForm() {
+interface DeviceFormProps {
+  onClose: () => void;
+}
+
+export function DeviceForm({ onClose }: DeviceFormProps) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -51,13 +56,14 @@ export function DeviceForm() {
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log(data);
 
-    toast("Tu enviaste los siguientes datos:", {
-      description: "algo de la fecha",
-      action: {
-        label: "Undo",
-        onClick: () => console.log("Undo"),
-      },
+    const res = setInfoAccountDevice(data);
+
+    toast.success("Datos enviados correctamente:", {
+      description: "Datos registrados.",
     });
+
+    //Cerramos el modal
+    onClose();
   }
 
   return (
@@ -129,7 +135,6 @@ export function DeviceForm() {
           <Button type="submit">Guardar</Button>
         </form>
       </Form>
-      <Toaster />
     </>
   );
 }

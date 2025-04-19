@@ -9,12 +9,13 @@ import {
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { ModalDeviceInfo } from "./devices-modal-info";
+import { Device } from "@/types/device";
 
-export function CardDeviceInfo() {
+export function CardDeviceInfo({ device }: { device: Device }) {
   return (
     <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle className="text-center">Nombre del dispositivo</CardTitle>
+        <CardTitle className="text-center">{device.marca}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-center py-3 bg-white w-40 rounded m-auto mb-8">
@@ -30,14 +31,16 @@ export function CardDeviceInfo() {
           <Label className="mb-4">Información del dispositivo</Label>
           <div className="text-sm rounded-md border p-3 space-y-1">
             <p>
-              <span className="font-medium">Modelo:</span> iPhone 14
+              <span className="font-medium">Sistema Operativo: </span>
+              {device.version_so}
             </p>
             <p>
-              <span className="font-medium">Sistema operativo:</span> iOS 16
+              <span className="font-medium">Tipo de dispositivo: </span>
+              {device.device_type}
             </p>
             <p>
-              <span className="font-medium">Tamaño de pantalla:</span> 6.1
-              pulgadas
+              <span className="font-medium">Estado: </span>
+              {device.status}
             </p>
           </div>
         </div>

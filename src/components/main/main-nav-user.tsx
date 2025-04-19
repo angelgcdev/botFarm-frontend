@@ -20,6 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { logout } from "@/app/login/logout.api";
 
 export function MainNavUser({
   user,
@@ -33,9 +34,17 @@ export function MainNavUser({
   const { isMobile } = useSidebar();
 
   const router = useRouter();
-  const handleLogout = () => {
-    Cookies.remove("access_token", { path: "/" });
+
+  const handleLogout = async () => {
+    //Eliminar usuario_id
     Cookies.remove("usuario_id", { path: "/" });
+
+    //Cerrar sesion
+    const res = await logout();
+
+    const data = await res.json();
+
+    console.log(data.message);
 
     router.push("/login");
   };

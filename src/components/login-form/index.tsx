@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/app/login/login.api";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 interface IFormInput {
@@ -41,32 +40,19 @@ export function LoginForm({
   } = useForm<IFormInput>({ resolver: zodResolver(loginSchema) }); //integrar zod con React Hook Form
   const router = useRouter();
 
-  useEffect(() => {
-    //Accede a las cookies solo despues de que el componente se haya montado
-    const token = Cookies.get("access_token");
-    if (token) {
-      console.log("Token encontrado:", token);
-      router.push("/main/dashboard"); //Redirige si ya esta autenticado
-    }
-  }, []);
-
   //Funcion para enviar los datos al backend de NestJS
   const onSubmit = handleSubmit(async (data: IFormInput) => {
     try {
       const res = await login(data);
       const resData = await res.json();
 
+      console.log("RES : ", res);
+      console.log("RES DATA : ", resData);
       //Verificar si el login fue exitoso
-      if (res.ok && resData.access_token) {
-        //Guarda el token en una cooke con js-cookie
-        Cookies.set("access_token", resData.access_token, {
-          expires: 2 / 24,
-          path: "/",
-        }); //expira en 1 hora
-
+      if (res.ok && resData.id) {
         //Guardar el ID del usuario
         Cookies.set("usuario_id", resData.id, {
-          expires: 2 / 24,
+          expires: 24 / 24,
           path: "/",
         });
 

@@ -14,7 +14,7 @@ const MainLayout = ({
     <>
       <ClientUserSender />
       <SocketProvider>
-        <Toaster />
+        <Toaster position="bottom-right" richColors closeButton />
         <SidebarProvider>
           <MainSidebar variant="inset" />
 

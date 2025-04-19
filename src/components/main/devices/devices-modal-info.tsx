@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +14,10 @@ interface ModalDeviceInfoProps {
 }
 
 export function ModalDeviceInfo({ children }: ModalDeviceInfoProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -25,7 +27,7 @@ export function ModalDeviceInfo({ children }: ModalDeviceInfoProps) {
           Completar la información del dispositivo para tener informes mas
           detallados
         </DialogDescription>
-        <DeviceForm />
+        <DeviceForm onClose={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );
