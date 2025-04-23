@@ -32,9 +32,8 @@ import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import socket from "@/lib/socket";
+import { getSocket } from "@/lib/socket";
 
 // Mock data for Facebook groups
 const facebookGroups = [
@@ -75,6 +74,7 @@ export function ScheduleInteractionsForm() {
 
     console.log("enviando datos a socket io... ");
 
+    const socket = getSocket();
     socket.emit("programar-automatizacion", data);
   };
 

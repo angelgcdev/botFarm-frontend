@@ -8,4 +8,5 @@ export interface Device {
   udid: string;
   usuario_id: number;
   version_so: string;
+  configuracion_completa: boolean;
 }

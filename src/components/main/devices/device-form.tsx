@@ -17,15 +17,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "../../ui/input";
-import { setInfoAccountDevice } from "@/app/main/devices/setInfoAccountDevice.api";
+import { completeInfoDevice } from "@/app/main/devices/completeInfoDevice.api";
+import { updateInfoDevice } from "@/app/main/devices/updateInfoDevice.api";
+import { useEffect } from "react";
 
 const items = [
   {
-    id: "tiktok",
+    id: "TIKTOK",
     label: "TikTok",
   },
   {
-    id: "facebook",
+    id: "FACEBOOK",
     label: "Facebook",
   },
 ] as const;
@@ -40,30 +42,91 @@ const FormSchema = z.object({
   }),
 });
 
-interface DeviceFormProps {
-  onClose: () => void;
+interface InitialData {
+  email: string;
+  items: string[];
 }
 
-export function DeviceForm({ onClose }: DeviceFormProps) {
+interface DeviceFormProps {
+  onClose: () => void;
+  deviceId: number;
+  onComplete: () => void;
+  initialData: InitialData | null;
+}
+
+export function DeviceForm({
+  onClose,
+  deviceId,
+  onComplete,
+  initialData,
+}: DeviceFormProps) {
+  console.log(initialData);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      email: "",
-      items: [],
+      email: initialData?.email || "",
+      items: initialData?.items ?? [],
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
+  //reset
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        email: initialData.email,
+        items: initialData.items,
+      });
+    }
+  }, [initialData, form]);
 
-    const res = setInfoAccountDevice(data);
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      const payload = { ...data, dispositivo_id: deviceId };
 
-    toast.success("Datos enviados correctamente:", {
-      description: "Datos registrados.",
-    });
+      console.log(payload);
 
-    //Cerramos el modal
-    onClose();
+      if (initialData) {
+        const resUpdate = await updateInfoDevice(payload);
+
+        if (resUpdate.status) {
+          toast.success("Datos actualizados correctamente:", {
+            description: resUpdate.message,
+          });
+
+          //Cerramos el modal
+          onClose();
+        } else {
+          toast.error("Error al actualizar", {
+            description: resUpdate.message || "Ocurrió un error inesperado",
+          });
+        }
+      } else {
+        const res = await completeInfoDevice(payload);
+
+        if (res.status) {
+          toast.success("Datos enviados correctamente:", {
+            description: res.message,
+          });
+
+          //Marcar el boton como completado
+          onComplete?.();
+
+          //Cerramos el modal
+          onClose();
+        } else {
+          toast.error("Error al registrar", {
+            description: res.message || "Ocurrió un error inesperado",
+          });
+        }
+      }
+    } catch (error) {
+      toast.error("Fallo la conexión", {
+        description: "No se pudo conectar al servidor",
+      });
+
+      console.error("Error al enviar datos:", error);
+    }
   }
 
   return (

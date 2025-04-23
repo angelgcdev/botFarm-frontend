@@ -1,12 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import socket from "@/lib/socket";
+import { getSocket } from "@/lib/socket";
 import { toast } from "sonner";
 
 const SocketContext = createContext({});
 
-export const SocketProvider = ({ children }) => {
+export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [device, setDevice] = useState("");
 
   useEffect(() => {
@@ -16,6 +16,7 @@ export const SocketProvider = ({ children }) => {
       toast.info(`Dispositivo conectado: ${udid}`);
     };
 
+    const socket = getSocket();
     socket.on("device_connected_notification", handleDeviceConnected);
 
     return () => {
