@@ -1,9 +1,19 @@
 "use client";
 
-import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+import { useState } from "react";
 import { TikTokIcon } from "../../icons/tiktok-icon";
 import { FacebookIcon } from "../../icons/facebook-icon";
-import { Check, ChevronDown, ChevronUp, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,58 +26,58 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { getSocket } from "@/lib/socket";
 
-// Mock data for Facebook groups
-const facebookGroups = [
-  { id: "group1", name: "Grupo de Marketing Digital" },
-  { id: "group2", name: "Emprendedores en Línea" },
-  { id: "group3", name: "Ventas y Publicidad" },
-  { id: "group4", name: "Desarrollo Web y Apps" },
-  { id: "group5", name: "Social Media Specialists" },
+const interactionsTiktokItems = [
+  {
+    id: "liked",
+    label: "Me Gusta",
+  },
+  {
+    id: "saved",
+    label: "Guardar Video",
+  },
 ];
 
-// Mock data for connected devices
-const connectedDevices = [
-  { id: "dev1", name: "Samsung Galaxy S21", platform: "Android" },
-  { id: "dev2", name: "iPhone 13", platform: "iOS" },
-  { id: "dev3", name: "Xiaomi Redmi Note 10", platform: "Android" },
-  { id: "dev4", name: "Motorola G9 Plus", platform: "Android" },
-  { id: "dev5", name: "Samsung Galaxy A52", platform: "Android" },
-];
+const tiktokInteractionSchema = z.object({
+  url_video: z.string().url().min(1, "El enlace es requerido"),
+  views_count: z
+    .number()
+    .min(0, "El número de vistas no puede ser menor que 0.")
+    .optional(),
+  items: z.array(z.string()),
+  comment: z.string().optional(),
+});
+
+type TikTokInteractionForm = z.infer<typeof tiktokInteractionSchema>;
 
 export function ScheduleInteractionsForm() {
-  const { register, handleSubmit } = useForm();
+  const form = useForm<z.infer<typeof tiktokInteractionSchema>>({
+    resolver: zodResolver(tiktokInteractionSchema),
+    defaultValues: {
+      url_video: "",
+      views_count: undefined,
+      items: [],
+      comment: "",
+    },
+  });
 
-  const [activeTab, setActiveTab] = React.useState("tiktok");
-  const [addComment, setAddComment] = React.useState(false);
-  const [selectedGroups, setSelectedGroups] = React.useState<string[]>([]);
-  const [showGroupList, setShowGroupList] = React.useState(false);
-  const [selectedDevices, setSelectedDevices] = React.useState<string[]>([]);
-  const [showDeviceList, setShowDeviceList] = React.useState(false);
+  const [activeTab, setActiveTab] = useState("tiktok");
+  const [addComment, setAddComment] = useState(false);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: TikTokInteractionForm) => {
     toast.success(
       `Interacción de ${
         activeTab === "tiktok" ? "TikTok" : "Facebook"
-      } programada correctamente`
+      } iniciada correctamente`
     );
 
     console.log(data);
@@ -75,32 +85,22 @@ export function ScheduleInteractionsForm() {
     console.log("enviando datos a socket io... ");
 
     const socket = getSocket();
-    socket.emit("programar-automatizacion", data);
-  };
 
-  const toggleGroupSelection = (groupId: string) => {
-    setSelectedGroups((prev) =>
-      prev.includes(groupId)
-        ? prev.filter((id) => id !== groupId)
-        : [...prev, groupId]
-    );
-  };
+    // Enviar los datos al servidor
+    socket.emit("startAutomation", data);
 
-  const toggleDeviceSelection = (deviceId: string) => {
-    setSelectedDevices((prev) =>
-      prev.includes(deviceId)
-        ? prev.filter((id) => id !== deviceId)
-        : [...prev, deviceId]
-    );
+    // Limpiar el formulario después de enviarlo
+    form.reset(); // Restablece todos los valores del formulario
   };
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="tiktok" className="flex items-center gap-2">
           <TikTokIcon className="h-4 w-4" />
           <span>TikTok</span>
         </TabsTrigger>
+
         <TabsTrigger value="facebook" className="flex items-center gap-2">
           <FacebookIcon className="h-4 w-4 text-blue-600" />
           <span className="text-blue-600">Facebook</span>
@@ -112,390 +112,168 @@ export function ScheduleInteractionsForm() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TikTokIcon className="h-5 w-5" />
-              Programar Interacciones en TikTok
+              Potencia tu visibilidad en TikTok
             </CardTitle>
             <CardDescription>
-              Configura las interacciones que deseas programar en TikTok
+              Amplifica tu alcance automáticamente generando interacciones
+              reales en tus videos favoritos.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="url-video">URL del Video</Label>
-                  <Input
-                    id="url-video"
-                    placeholder="https://tiktok.com/@usuario/video/123456789"
-                    {...register("url_video")}
-                  />
-                </div>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                <FormField
+                  control={form.control}
+                  name="url_video"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Enlace del video</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="url-video"
+                          placeholder="Pega aquí la URL del video (ej: https://tiktok.com/@usuario/video/123456789)"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Alguna descripcion</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                <div className="space-y-2">
-                  <Label>Tipo de Interacción</Label>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="tiktok-like" />
-                      <Label htmlFor="tiktok-like" className="font-normal">
-                        Dar Me Gusta
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="tiktok-save" />
-                      <Label htmlFor="tiktok-save" className="font-normal">
-                        Guardar Video
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="tiktok-comment"
-                        checked={addComment}
-                        onCheckedChange={(checked) => {
-                          if (typeof checked === "boolean")
-                            setAddComment(checked);
-                        }}
-                      />
-                      <Label htmlFor="tiktok-comment" className="font-normal">
-                        Añadir Comentario
-                      </Label>
-                    </div>
-                  </div>
+                <FormField
+                  control={form.control}
+                  name="items"
+                  render={() => (
+                    <FormItem>
+                      <div className="mb-4">
+                        <FormLabel className="text-base">
+                          ¿Qué acciones quieres realizar?
+                        </FormLabel>
+                        <FormDescription>
+                          Alguna descripcion o borrame
+                        </FormDescription>
+                      </div>
+                      {interactionsTiktokItems.map((item) => (
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name="items"
+                          render={({ field }) => {
+                            return (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    id="tiktok-like"
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...field.value,
+                                            item.id,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== item.id
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {item.label}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="tiktok-comment"
+                    checked={addComment}
+                    onCheckedChange={(checked) => {
+                      if (typeof checked === "boolean") setAddComment(checked);
+                    }}
+                  />
+                  <Label htmlFor="tiktok-comment" className="font-normal">
+                    Comentar (Opcional)
+                  </Label>
                 </div>
 
                 {addComment && (
-                  <div className="space-y-2">
-                    <Label htmlFor="tiktok-comment-text">
-                      Texto del Comentario
-                    </Label>
-                    <Textarea
-                      id="tiktok-comment-text"
-                      placeholder="Escribe tu comentario aquí..."
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="comment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Escribe el comentario a publicar</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            id="tiktok-comment-text"
+                            placeholder="Escribe......"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>alguna descripcion</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="tiktok-views">
-                    Cantidad de Vistas a Generar
-                  </Label>
-                  <Input
-                    id="tiktok-views"
-                    type="number"
-                    min="0"
-                    placeholder="1000"
-                    {...register("num_views")}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="tiktok-devices">
-                      Dispositivos a Utilizar
-                    </Label>
-                    <Select defaultValue="all">
-                      <SelectTrigger id="tiktok-devices">
-                        <SelectValue placeholder="Selecciona dispositivos" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">
-                          Todos los dispositivos
-                        </SelectItem>
-                        <SelectItem value="group1">
-                          Grupo 1 (5 dispositivos)
-                        </SelectItem>
-                        <SelectItem value="group2">
-                          Grupo 2 (3 dispositivos)
-                        </SelectItem>
-                        <SelectItem value="custom">Personalizado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tiktok-schedule">Programar para</Label>
-                    <Select defaultValue="now">
-                      <SelectTrigger id="tiktok-schedule">
-                        <SelectValue placeholder="Selecciona cuándo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="now">Ejecutar ahora</SelectItem>
-                        <SelectItem value="1h">En 1 hora</SelectItem>
-                        <SelectItem value="today">Hoy a las 20:00</SelectItem>
-                        <SelectItem value="tomorrow">
-                          Mañana a las 10:00
-                        </SelectItem>
-                        <SelectItem value="custom">Personalizado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="views_count"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        ¿Cuántas visualizaciones deseas generar?
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          id="tiktok-views"
+                          type="number"
+                          min="0"
+                          placeholder="100"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value)
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>Alguna descripcion</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
           </CardContent>
           <CardFooter className="flex justify-end">
             <Button
-              onClick={handleSubmit(onSubmit)}
+              onClick={form.handleSubmit(onSubmit)}
               className="bg-black hover:bg-black/40 text-white"
             >
-              Programar Interacción
+              Iniciar Interacciones
             </Button>
           </CardFooter>
         </Card>
       </TabsContent>
 
-      <TabsContent value="facebook">
-        <Card className="w-full border-t-0 rounded-tl-none rounded-tr-none">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[#1877F2]">
-              <FacebookIcon className="h-5 w-5 text-[#1877F2]" />
-              Programar Interacciones en Facebook
-            </CardTitle>
-            <CardDescription>
-              Configura las interacciones que deseas programar en Facebook
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="facebook-url">URL de la Publicación</Label>
-                  <Input
-                    id="facebook-url"
-                    placeholder="https://facebook.com/usuario/posts/123456789"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tipo de Interacción</Label>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="facebook-like" />
-                      <Label htmlFor="facebook-like" className="font-normal">
-                        Dar Me Gusta
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="facebook-comment"
-                        checked={addComment}
-                        onCheckedChange={(checked) => {
-                          if (typeof checked === "boolean")
-                            setAddComment(checked);
-                        }}
-                      />
-                      <Label htmlFor="facebook-comment" className="font-normal">
-                        Añadir Comentario
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-
-                {addComment && (
-                  <div className="space-y-2">
-                    <Label htmlFor="facebook-comment-text">
-                      Texto del Comentario
-                    </Label>
-                    <Textarea
-                      id="facebook-comment-text"
-                      placeholder="Escribe tu comentario aquí..."
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="facebook-groups">Grupos a Compartir</Label>
-                  <div className="relative">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full justify-between"
-                      onClick={() => setShowGroupList(!showGroupList)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        <span>
-                          {selectedGroups.length === 0
-                            ? "Selecciona grupos para compartir"
-                            : `${selectedGroups.length} grupos seleccionados`}
-                        </span>
-                      </div>
-                      {showGroupList ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </Button>
-
-                    {showGroupList && (
-                      <Card className="absolute z-10 w-full mt-1">
-                        <CardContent className="p-2">
-                          <ScrollArea className="h-60">
-                            <div className="space-y-2 p-2">
-                              {facebookGroups.map((group) => (
-                                <div
-                                  key={group.id}
-                                  className="flex items-center space-x-2 p-2 hover:bg-slate-100 rounded-md cursor-pointer"
-                                  onClick={() => toggleGroupSelection(group.id)}
-                                >
-                                  <Checkbox
-                                    checked={selectedGroups.includes(group.id)}
-                                    id={`group-${group.id}`}
-                                  />
-                                  <Label
-                                    htmlFor={`group-${group.id}`}
-                                    className="font-normal cursor-pointer flex-1"
-                                  >
-                                    {group.name}
-                                  </Label>
-                                  {selectedGroups.includes(group.id) && (
-                                    <Check className="h-4 w-4 text-blue-600" />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </ScrollArea>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-
-                  {selectedGroups.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {selectedGroups.map((groupId) => {
-                        const group = facebookGroups.find(
-                          (g) => g.id === groupId
-                        );
-                        return (
-                          <Badge
-                            key={groupId}
-                            variant="outline"
-                            className="bg-blue-50 text-blue-700 border-blue-200"
-                          >
-                            {group?.name}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="facebook-devices">
-                      Dispositivos a Utilizar
-                    </Label>
-                    <div className="relative">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full justify-between"
-                        onClick={() => setShowDeviceList(!showDeviceList)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>
-                            {selectedDevices.length === 0
-                              ? "Selecciona dispositivos"
-                              : `${selectedDevices.length} dispositivos seleccionados`}
-                          </span>
-                        </div>
-                        {showDeviceList ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </Button>
-
-                      {showDeviceList && (
-                        <Card className="absolute z-10 w-full mt-1">
-                          <CardContent className="p-2">
-                            <ScrollArea className="h-52">
-                              <div className="space-y-2 p-2">
-                                {connectedDevices.map((device) => (
-                                  <div
-                                    key={device.id}
-                                    className="flex items-center space-x-2 p-2 hover:bg-slate-100 rounded-md cursor-pointer"
-                                    onClick={() =>
-                                      toggleDeviceSelection(device.id)
-                                    }
-                                  >
-                                    <Checkbox
-                                      checked={selectedDevices.includes(
-                                        device.id
-                                      )}
-                                      id={`device-${device.id}`}
-                                    />
-                                    <div className="flex-1">
-                                      <Label
-                                        htmlFor={`device-${device.id}`}
-                                        className="font-normal cursor-pointer"
-                                      >
-                                        {device.name}
-                                      </Label>
-                                      <p className="text-xs text-muted-foreground">
-                                        {device.platform}
-                                      </p>
-                                    </div>
-                                    {selectedDevices.includes(device.id) && (
-                                      <Check className="h-4 w-4 text-blue-600" />
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </ScrollArea>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
-
-                    {selectedDevices.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {selectedDevices.map((deviceId) => {
-                          const device = connectedDevices.find(
-                            (d) => d.id === deviceId
-                          );
-                          return (
-                            <Badge
-                              key={deviceId}
-                              variant="outline"
-                              className="bg-slate-50 text-slate-700 border-slate-200"
-                            >
-                              {device?.name}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="facebook-schedule">Programar para</Label>
-                    <Select defaultValue="now">
-                      <SelectTrigger id="facebook-schedule">
-                        <SelectValue placeholder="Selecciona cuándo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="now">Ejecutar ahora</SelectItem>
-                        <SelectItem value="1h">En 1 hora</SelectItem>
-                        <SelectItem value="today">Hoy a las 20:00</SelectItem>
-                        <SelectItem value="tomorrow">
-                          Mañana a las 10:00
-                        </SelectItem>
-                        <SelectItem value="custom">Personalizado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button
-              // onClick={handleSubmit}
-              className="bg-[#1877F2] hover:bg-[#1877F2]/80"
-            >
-              Programar Interacción
-            </Button>
-          </CardFooter>
-        </Card>
-      </TabsContent>
-      <Toaster />
+      <TabsContent value="facebook"></TabsContent>
     </Tabs>
   );
 }

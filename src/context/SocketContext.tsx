@@ -17,10 +17,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const socket = getSocket();
-    socket.on("device_connected_notification", handleDeviceConnected);
+    socket.on("deviceConnectedNotification", handleDeviceConnected);
 
     return () => {
-      socket.off("device_connected_notification", handleDeviceConnected);
+      socket.off("deviceConnectedNotification", handleDeviceConnected);
     };
   }, []);
 
