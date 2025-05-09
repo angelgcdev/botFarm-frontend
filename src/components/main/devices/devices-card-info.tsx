@@ -1,3 +1,12 @@
+"use client";
+
+// 1. Librerías de Node.js
+
+// 2. Librerías de terceros
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+// 3. Librerías internas absolutas
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,22 +16,96 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Device } from "@/types/device";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+// 4. Imports relativos
 import Image from "next/image";
 import { DevicesModalInfo } from "./devices-modal-info";
-import { Device } from "@/types/device";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { getSocket } from "@/lib/socket";
 
 export function DevicesCardInfo({ device }: { device: Device }) {
+  const [status, setStatus] = useState(device.status);
+
   const [infoCompletada, setInfoCompletada] = useState<boolean>(
-    device.configuracion_completa
+    device.complete_config
   );
   const router = useRouter();
+
+  console.log(device);
+  console.log("informacion completada:", infoCompletada);
+
+  useEffect(() => {
+    const handleDeviceConnectedStatus = (payload: {
+      udid: string;
+      status: string;
+    }) => {
+      if (payload.udid === device.udid) {
+        setStatus(payload.status); // Cambia a "ACTIVO"
+      }
+    };
+
+    const handleDeviceDisconnectedStatus = (payload: {
+      udid: string;
+      status: string;
+    }) => {
+      if (payload.udid === device.udid) {
+        setStatus(payload.status); // Cambia a "INACTIVO"
+      }
+    };
+
+    const socket = getSocket();
+
+    socket.on("device:connected:status", handleDeviceConnectedStatus);
+    socket.on("device:disconnected:status", handleDeviceDisconnectedStatus);
+
+    return () => {
+      socket.off("device:connected:status", handleDeviceConnectedStatus);
+      socket.off("device:disconnected:status", handleDeviceDisconnectedStatus);
+    };
+  }, []);
+
+  const isActive = status === "ACTIVO";
 
   return (
     <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle className="text-center">{device.marca}</CardTitle>
+        <CardTitle className="text-center">
+          {device.brand} {device.udid}
+        </CardTitle>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge
+                variant="outline"
+                className={
+                  isActive
+                    ? "text-green-600 border-green-600"
+                    : "text-gray-400 border-gray-400"
+                }
+              >
+                {isActive ? "Conectado" : "Desconectado"}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="font-medium">
+                Última conexión:{" "}
+                {isActive
+                  ? new Date(device.connected_at).toLocaleString()
+                  : device.last_activity
+                  ? new Date(device.last_activity).toLocaleString()
+                  : "Nunca"}
+              </span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-center py-3 bg-white w-40 rounded m-auto mb-8">
@@ -39,7 +122,7 @@ export function DevicesCardInfo({ device }: { device: Device }) {
           <div className="text-sm rounded-md border p-3 space-y-1">
             <p>
               <span className="font-medium">Sistema Operativo: </span>
-              {device.version_so}
+              {device.os_version}
             </p>
             <p>
               <span className="font-medium">Tipo de dispositivo: </span>
@@ -54,6 +137,7 @@ export function DevicesCardInfo({ device }: { device: Device }) {
       </CardContent>
       <CardFooter className="flex justify-center">
         <DevicesModalInfo
+          infoCompletada={infoCompletada}
           deviceId={device.id}
           onComplete={() => {
             setInfoCompletada(true);

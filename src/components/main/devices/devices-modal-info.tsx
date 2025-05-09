@@ -14,14 +14,15 @@ interface ModalDeviceInfoProps {
   children: ReactNode;
   deviceId: number;
   onComplete: () => void;
+  infoCompletada: boolean;
 }
 
-interface RedSocial {
+interface SocialNetwork {
   name: string; // Aquí se asume que 'name' es una cadena de texto, ajusta si es diferente
 }
 
-interface CuentaRedSocial {
-  red_social: RedSocial;
+interface SocialNetworkAccount {
+  social_network: SocialNetwork;
 }
 
 interface InitialData {
@@ -31,6 +32,7 @@ interface InitialData {
 }
 
 export function DevicesModalInfo({
+  infoCompletada,
   children,
   deviceId,
   onComplete,
@@ -55,7 +57,8 @@ export function DevicesModalInfo({
               email: data.cuentaGoogle.email,
               dispositivo_id: deviceId,
               items: data.cuenta_red_social.map(
-                (r: CuentaRedSocial) => r?.red_social?.name || "Desconocido"
+                (r: SocialNetworkAccount) =>
+                  r?.social_network?.name || "Desconocido"
               ),
             });
           } else {
@@ -79,7 +82,9 @@ export function DevicesModalInfo({
       }
     };
 
-    fetchInitialData();
+    if (infoCompletada) {
+      fetchInitialData();
+    }
   }, [open, deviceId]);
 
   console.log("Initial Data: ", initialData);

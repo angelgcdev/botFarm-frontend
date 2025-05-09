@@ -49,9 +49,9 @@ export function LoginForm({
       console.log("RES : ", res);
       console.log("RES DATA : ", resData);
       //Verificar si el login fue exitoso
-      if (res.ok && resData.id) {
+      if (res.ok && resData.user_id) {
         //Guardar el ID del usuario
-        Cookies.set("usuario_id", resData.id, {
+        Cookies.set("user_id", resData.user_id, {
           expires: 24 / 24,
           path: "/",
         });

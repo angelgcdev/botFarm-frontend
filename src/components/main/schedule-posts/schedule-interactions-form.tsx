@@ -1,6 +1,16 @@
 "use client";
 
+// 1. Librerías de Node.js
+
+// 2. Librerías de terceros
+import { z } from "zod";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useContext } from "react";
+
+// 3. Librerías internas absolutas
 import {
   Form,
   FormControl,
@@ -10,11 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-import { useState } from "react";
-import { TikTokIcon } from "../../icons/tiktok-icon";
-import { FacebookIcon } from "../../icons/facebook-icon";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,15 +31,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { getSocket } from "@/lib/socket";
+import { DevicesContext } from "@/context/DevicesContext";
+
+// 4. Imports relativos
+import { TikTokIcon } from "../../icons/tiktok-icon";
+import { FacebookIcon } from "../../icons/facebook-icon";
 
 const interactionsTiktokItems = [
   {
@@ -48,7 +53,7 @@ const interactionsTiktokItems = [
 ];
 
 const tiktokInteractionSchema = z.object({
-  url_video: z.string().url().min(1, "El enlace es requerido"),
+  video_url: z.string().url().min(1, "El enlace es requerido"),
   views_count: z
     .number()
     .min(0, "El número de vistas no puede ser menor que 0.")
@@ -60,10 +65,14 @@ const tiktokInteractionSchema = z.object({
 type TikTokInteractionForm = z.infer<typeof tiktokInteractionSchema>;
 
 export function ScheduleInteractionsForm() {
+  //Obtener datos de los dispositivos mediante useContext
+  const devices = useContext(DevicesContext);
+
+  //Use form
   const form = useForm<z.infer<typeof tiktokInteractionSchema>>({
     resolver: zodResolver(tiktokInteractionSchema),
     defaultValues: {
-      url_video: "",
+      video_url: "",
       views_count: undefined,
       items: [],
       comment: "",
@@ -73,21 +82,29 @@ export function ScheduleInteractionsForm() {
   const [activeTab, setActiveTab] = useState("tiktok");
   const [addComment, setAddComment] = useState(false);
 
-  const onSubmit = (data: TikTokInteractionForm) => {
+  const onSubmit = (scheduledTiktokData: TikTokInteractionForm) => {
     toast.success(
       `Interacción de ${
         activeTab === "tiktok" ? "TikTok" : "Facebook"
       } iniciada correctamente`
     );
 
-    console.log(data);
+    //Filtrar dispositivos conectados
+    const activeDevices = devices.filter(
+      (device) => device.status === "ACTIVO"
+    );
+    console.log(activeDevices);
+    console.log(scheduledTiktokData);
 
     console.log("enviando datos a socket io... ");
 
     const socket = getSocket();
 
     // Enviar los datos al servidor
-    socket.emit("startAutomation", data);
+    socket.emit("schedule:tiktok:start", {
+      scheduledTiktokData,
+      activeDevices,
+    });
 
     // Limpiar el formulario después de enviarlo
     form.reset(); // Restablece todos los valores del formulario
@@ -127,13 +144,13 @@ export function ScheduleInteractionsForm() {
               >
                 <FormField
                   control={form.control}
-                  name="url_video"
+                  name="video_url"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Enlace del video</FormLabel>
                       <FormControl>
                         <Input
-                          id="url-video"
+                          id="video_url"
                           placeholder="Pega aquí la URL del video (ej: https://tiktok.com/@usuario/video/123456789)"
                           {...field}
                         />

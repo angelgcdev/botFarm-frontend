@@ -3,10 +3,10 @@ export interface Device {
   device_type: string;
   id: number;
   last_activity: string | null;
-  marca: string;
+  brand: string;
   status: string;
   udid: string;
-  usuario_id: number;
-  version_so: string;
-  configuracion_completa: boolean;
+  user_id: number;
+  os_version: string;
+  complete_config: boolean;
 }

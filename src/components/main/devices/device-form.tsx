@@ -1,9 +1,14 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+// 1. Librerías de Node.js
+
+// 2. Librerías de terceros
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useEffect } from "react";
 
+// 3. Librerías internas absolutas
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,10 +21,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "../../ui/input";
 import { completeInfoDevice } from "@/app/main/devices/completeInfoDevice.api";
 import { updateInfoDevice } from "@/app/main/devices/updateInfoDevice.api";
-import { useEffect } from "react";
+
+// 4. Imports relativos
+import { Input } from "../../ui/input";
 
 const items = [
   {

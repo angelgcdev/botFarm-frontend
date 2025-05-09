@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/sidebar";
 import { logout } from "@/app/login/logout.api";
 
+import { disconnectSocket } from "@/lib/socket";
+
 export function MainNavUser({
   user,
 }: {
@@ -36,6 +38,9 @@ export function MainNavUser({
   const router = useRouter();
 
   const handleLogout = async () => {
+    //Cerrar sesión socket io
+    disconnectSocket();
+
     //Eliminar usuario_id
     Cookies.remove("usuario_id", { path: "/" });
 

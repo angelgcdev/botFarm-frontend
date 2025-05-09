@@ -6,13 +6,13 @@ import { getSocket } from "./socket";
 
 export const useRegisterSocketUser = () => {
   useEffect(() => {
-    const usuario_id = Number(Cookies.get("usuario_id"));
-    if (!usuario_id || isNaN(usuario_id)) {
-      console.error("🚨 No se encontró usuario_id válido en la cookie");
+    const user_id = Number(Cookies.get("user_id"));
+    if (!user_id || isNaN(user_id)) {
+      console.error("🚨 No se encontró user_id válido en la cookie");
       return;
     }
 
     const socket = getSocket();
-    socket.emit("registrar_usuario", { usuario_id });
+    socket.emit("user:register", { user_id });
   }, []);
 };
