@@ -9,9 +9,8 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/app/login/login.api";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-
 interface IFormInput {
   email: string;
   password: string;
@@ -38,7 +37,7 @@ export function LoginForm({
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<IFormInput>({ resolver: zodResolver(loginSchema) }); //integrar zod con React Hook Form
-  const router = useRouter();
+  // const router = useRouter();
 
   //Funcion para enviar los datos al backend de NestJS
   const onSubmit = handleSubmit(async (data: IFormInput) => {
@@ -57,7 +56,8 @@ export function LoginForm({
         });
 
         //Redirige al dashboard
-        router.push("/main/dashboard");
+        // router.push("/main/dashboard");
+        window.location.href = "/main/dashboard";
       } else {
         console.error("Login fallido", resData.message);
       }

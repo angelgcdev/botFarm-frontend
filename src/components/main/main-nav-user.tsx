@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 import { logout } from "@/app/login/logout.api";
 
-import { disconnectSocket } from "@/lib/socket";
+import { disconnectSocket, getSocket } from "@/lib/socket/socketClient";
 
 export function MainNavUser({
   user,
@@ -38,11 +38,15 @@ export function MainNavUser({
   const router = useRouter();
 
   const handleLogout = async () => {
+    const socket = getSocket();
+
+    socket.emit("cerrarSesion");
+
     //Cerrar sesión socket io
     disconnectSocket();
 
     //Eliminar usuario_id
-    Cookies.remove("usuario_id", { path: "/" });
+    Cookies.remove("user_id", { path: "/" });
 
     //Cerrar sesion
     const res = await logout();

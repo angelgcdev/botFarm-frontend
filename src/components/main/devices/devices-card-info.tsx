@@ -28,7 +28,7 @@ import {
 // 4. Imports relativos
 import Image from "next/image";
 import { DevicesModalInfo } from "./devices-modal-info";
-import { getSocket } from "@/lib/socket";
+import { getSocket } from "@/lib/socket/socketClient";
 
 export function DevicesCardInfo({ device }: { device: Device }) {
   const [status, setStatus] = useState(device.status);

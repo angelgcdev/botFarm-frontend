@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getSocket } from "@/lib/socket";
+import { getSocket } from "@/lib/socket/socketClient";
 import { DevicesContext } from "@/context/DevicesContext";
 
 // 4. Imports relativos
