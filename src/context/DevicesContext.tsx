@@ -8,11 +8,7 @@ import { getAllDevices } from "@/app/main/devices/device.api";
 const DevicesContext = createContext<Device[]>([]);
 
 //2. Crear el proveedor
-export const DevicesProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+const DevicesProvider = ({ children }: { children: React.ReactNode }) => {
   const [devices, setDevices] = useState<Device[]>([]);
 
   useEffect(() => {
@@ -37,4 +33,4 @@ export const DevicesProvider = ({
   );
 };
 
-export { DevicesContext };
+export { DevicesContext, DevicesProvider };

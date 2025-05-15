@@ -2,6 +2,16 @@
 import { toast } from "sonner";
 import { Socket } from "socket.io-client";
 
+type ScheduleTiktokStatusData = {
+  idRelations: {
+    udid: string;
+    device_id: number;
+    device_scheduled_tiktok_interaction_id: number;
+  };
+  status: string;
+  error?: string;
+};
+
 const socketDeviceConnectionNotification = (socket: Socket) => {
   const handleDeviceConnected = (udid: string) => {
     console.log("Dispositivo conectado: ", udid);
@@ -13,11 +23,16 @@ const socketDeviceConnectionNotification = (socket: Socket) => {
     toast.warning(`Dispositivo desconectado: ${udid}`);
   };
 
-  const handleScheduleTiktokStatusNotification = (data: {
-    id: number;
-    status: string;
-  }) => {
-    toast.info(`Interacción : ${data.status}`);
+  const handleScheduleTiktokStatusNotification = (
+    data: ScheduleTiktokStatusData
+  ) => {
+    toast.info(
+      `Interacción en dispositivo ${data.idRelations.udid} : ${data.status}`,
+      {
+        description: data.error,
+        duration: 8000,
+      }
+    );
   };
 
   socket.off("device:connected:notification", handleDeviceConnected);

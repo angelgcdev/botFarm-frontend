@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "../../ui/dialog";
 import { DeviceForm } from "./device-form";
-import { getInfoDevice } from "@/app/main/devices/getInfoDevice";
+import { getInfoDevice } from "@/app/main/devices/getInfoDevice.api";
 
 interface ModalDeviceInfoProps {
   children: ReactNode;

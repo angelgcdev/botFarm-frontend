@@ -1,4 +1,4 @@
-// src/app/main/devices/devices.api.ts
+// src/app/main/devices/getInfoDevice.api.ts
 
 const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 

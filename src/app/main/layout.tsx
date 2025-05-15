@@ -1,45 +1,43 @@
 "use client";
 
-import { MainSidebar } from "@/components/main/main-sidebar";
-import { MainSiteHeader } from "@/components/main/main-site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Toaster } from "sonner";
-import SendUserIdOnLoad from "./ClientUserSender";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import ClientMainLayout from "./client-main-layout";
 
-import { DevicesProvider } from "@/context/DevicesContext";
-import { useSocket } from "@/hooks/useSocket";
-
-const MainLayout = ({
+export default function ProtectedLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) => {
-  //Iniciando la conexion socket io client
-  useSocket();
+}) {
+  const router = useRouter();
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
-  return (
-    <>
-      <DevicesProvider>
-        <SendUserIdOnLoad />
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`,
+          {
+            credentials: "include",
+          }
+        );
 
-        <Toaster position="bottom-right" richColors closeButton />
-        <SidebarProvider>
-          <MainSidebar variant="inset" />
+        console.log("Response:", res);
+        if (!res.ok) {
+          router.push("/login");
+        } else {
+          setIsAuthChecked(true); // Solo mostrar hijos si está autenticado
+        }
+      } catch (err) {
+        router.push("/login");
+        console.log(err);
+      }
+    };
 
-          <SidebarInset>
-            <MainSiteHeader />
-            <div className="flex flex-1 flex-col">
-              <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                  {children}
-                </div>
-              </div>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </DevicesProvider>
-    </>
-  );
-};
+    checkAuth();
+  }, [router]);
 
-export default MainLayout;
+  if (!isAuthChecked) return <div>Cargando...</div>; // Evita mostrar el layout hasta verificar
+
+  return <ClientMainLayout>{children}</ClientMainLayout>;
+}

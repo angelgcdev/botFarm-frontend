@@ -1,12 +1,12 @@
 "use client";
 
-import type * as React from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowUpCircleIcon,
   ClockIcon,
-  LogOutIcon,
+  // LogOutIcon,
   SmartphoneIcon,
-  UserIcon,
+  // UserIcon,
 } from "lucide-react";
 import { TikTokIcon } from "@/components/icons/tiktok-icon";
 import { FacebookIcon } from "@/components/icons/facebook-icon";
@@ -27,13 +27,9 @@ import {
 import { CollapsibleNavMain } from "./main-collapsible-nav";
 import Link from "next/link";
 import { ModeToggle } from "../mode-toggle";
+import Cookies from "js-cookie";
 
 const data = {
-  user: {
-    name: "Usuario",
-    email: "usuario@ejemplo.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     // {
     //   title: "Redes Sociales",
@@ -69,18 +65,18 @@ const data = {
       icon: ClockIcon,
     },
   ],
-  navSecondary: [
-    {
-      title: "Usuario",
-      url: "#",
-      icon: UserIcon,
-    },
-    {
-      title: "Cerrar Sesión",
-      url: "/login",
-      icon: LogOutIcon,
-    },
-  ],
+  // navSecondary: [
+  //   {
+  //     title: "Usuario",
+  //     url: "#",
+  //     icon: UserIcon,
+  //   },
+  //   {
+  //     title: "Cerrar Sesión",
+  //     url: "/login",
+  //     icon: LogOutIcon,
+  //   },
+  // ],
   documents: [
     {
       name: "Guía de TikTok",
@@ -103,6 +99,20 @@ const data = {
 export function MainSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const [email, setEmail] = useState("usuario@ejemplo.com");
+
+  useEffect(() => {
+    const cookieEmail = Cookies.get("email");
+    if (cookieEmail) {
+      setEmail(cookieEmail);
+    }
+  }, []);
+
+  const user = {
+    email,
+    avatar: "/avatar/perfil.png",
+  };
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -129,7 +139,7 @@ export function MainSidebar({
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <MainNavUser user={data.user} />
+        <MainNavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

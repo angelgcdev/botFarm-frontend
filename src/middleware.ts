@@ -1,24 +1,12 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import * as jose from "jose";
 
 export async function middleware(req: NextRequest) {
-  const token = req.cookies.get("access_token")?.value;
+  const hasToken = req.cookies.has("access_token");
 
-  //Si no hay token, redirige al login
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+  console.log("Middleware cookies:", req.cookies.getAll());
 
-  if (!process.env.JWT_SECRET) {
-    throw new Error("No token provided");
-  }
-
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    await jose.jwtVerify(token, secret);
-  } catch (error) {
-    console.error("Token inválido:", error);
+  if (!hasToken) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
