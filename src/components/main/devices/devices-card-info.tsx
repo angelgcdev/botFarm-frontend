@@ -3,7 +3,7 @@
 // 1. Librerías de Node.js
 
 // 2. Librerías de terceros
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // 3. Librerías internas absolutas
@@ -28,9 +28,12 @@ import {
 // 4. Imports relativos
 import Image from "next/image";
 import { DevicesModalInfo } from "./devices-modal-info";
-import { getSocket } from "@/lib/socket/socketClient";
+import { SocketContext } from "@/context/SocketContext";
+import { toast } from "sonner";
 
 export function DevicesCardInfo({ device }: { device: Device }) {
+  const { socket } = useContext(SocketContext);
+
   const [status, setStatus] = useState(device.status);
 
   const [infoCompletada, setInfoCompletada] = useState<boolean>(
@@ -42,6 +45,11 @@ export function DevicesCardInfo({ device }: { device: Device }) {
   console.log("informacion completada:", infoCompletada);
 
   useEffect(() => {
+    if (!socket) {
+      toast.error("No hay conexión con el servidor.");
+      return;
+    }
+
     const handleDeviceConnectedStatus = (payload: {
       udid: string;
       status: string;
@@ -59,8 +67,6 @@ export function DevicesCardInfo({ device }: { device: Device }) {
         setStatus(payload.status); // Cambia a "INACTIVO"
       }
     };
-
-    const socket = getSocket();
 
     socket.on("device:connected:status", handleDeviceConnectedStatus);
     socket.on("device:disconnected:status", handleDeviceDisconnectedStatus);

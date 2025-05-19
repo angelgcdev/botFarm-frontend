@@ -6,7 +6,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useContext } from "react";
 
@@ -30,27 +30,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getSocket } from "@/lib/socket/socketClient";
 import { DevicesContext } from "@/context/DevicesContext";
 
 // 4. Imports relativos
 import { TikTokIcon } from "../../icons/tiktok-icon";
 import { FacebookIcon } from "../../icons/facebook-icon";
-
-const interactionsTiktokItems = [
-  {
-    id: "liked",
-    label: "Me Gusta",
-  },
-  {
-    id: "saved",
-    label: "Guardar Video",
-  },
-];
+import { ScheduledTiktokInteractions } from "./ScheduledTiktokInteractions";
+import { getInteractionsTiktokData } from "@/app/main/schedule-posts/getInteractionsTiktokData.api";
+import { ScheduledTiktokInteraction } from "@/app/main/schedule-posts/types";
+import { SocketContext } from "@/context/SocketContext";
+import {
+  createInteractionTiktokData,
+  deleteInteractionTiktokData,
+  editInteractionTiktokData,
+} from "@/app/main/schedule-posts/api";
 
 const tiktokInteractionSchema = z.object({
   video_url: z.string().url().min(1, "El enlace es requerido"),
@@ -58,13 +54,54 @@ const tiktokInteractionSchema = z.object({
     .number()
     .min(0, "El número de vistas no puede ser menor que 0.")
     .optional(),
-  items: z.array(z.string()),
+  liked: z.boolean().optional(),
+  saved: z.boolean().optional(),
   comment: z.string().optional(),
 });
 
-type TikTokInteractionForm = z.infer<typeof tiktokInteractionSchema>;
+export type TikTokInteractionForm = z.infer<typeof tiktokInteractionSchema>;
 
 export function ScheduleInteractionsForm() {
+  //
+  const [scheduledTiktokInteractions, setscheduledTiktokInteractions] =
+    useState<ScheduledTiktokInteraction[]>([]);
+  //
+  const { socket } = useContext(SocketContext);
+
+  useEffect(() => {
+    if (!socket) {
+      toast.error("No hay conexión con el servidor.");
+      return;
+    }
+
+    const fetchData = async () => {
+      await loadData();
+    };
+
+    fetchData(); // Obtener datos
+
+    //Listener que vuelve a cargar los datos cuando llega el evento
+    const handleUpdate = async () => {
+      await loadData();
+    };
+
+    socket.on("schedule:tiktok:interaction:update", handleUpdate);
+
+    return () => {
+      socket.off("schedule:tiktok:interaction:update", handleUpdate);
+    };
+  }, [socket]);
+
+  //obtener datos
+  const loadData = async () => {
+    const interacciones = await getInteractionsTiktokData();
+    console.log(
+      "Datos de la tabla de schedule_tiktok_interactions:",
+      interacciones
+    );
+    setscheduledTiktokInteractions(interacciones);
+  };
+
   //Obtener datos de los dispositivos mediante useContext
   const devices = useContext(DevicesContext);
 
@@ -74,40 +111,94 @@ export function ScheduleInteractionsForm() {
     defaultValues: {
       video_url: "",
       views_count: 0,
-      items: [],
+      liked: false,
+      saved: false,
       comment: "",
     },
   });
 
   const [activeTab, setActiveTab] = useState("tiktok");
-  const [addComment, setAddComment] = useState(false);
 
-  const onSubmit = (scheduledTiktokData: TikTokInteractionForm) => {
+  //por si acaso
+  if (!socket) {
+    toast.error("No hay conexión con el servidor.");
+    return;
+  }
+
+  const onSubmit = async (scheduledTiktokDataForm: TikTokInteractionForm) => {
+    console.log("Datos de la interaccion de tiktok:", scheduledTiktokDataForm);
+
+    const res = await createInteractionTiktokData(scheduledTiktokDataForm);
+
+    if (res?.error) {
+      toast.error(`Error al crear la interacción: ${res.message}`);
+    }
+
+    //Actualizar datos del servidor
+    await loadData();
+
+    toast.success("Creado correctamente");
+
+    form.reset();
+  };
+
+  //Funcion para ejecutar interaccion
+  const handleExecuteScheduledTiktokInteraction = async (
+    scheduledTiktokInteractionData: ScheduledTiktokInteraction
+  ) => {
+    //Filtrar dispositivos conectados
+    const activeDevices = devices.filter(
+      (device) => device.status === "ACTIVO"
+    );
+    console.log("Dispositivos activos:", activeDevices);
+    console.log("Datos de la interaccion", scheduledTiktokInteractionData);
+
+    console.log("enviando datos a socket io... ");
+
+    // Enviar los datos al servidor
+    socket.emit("schedule:tiktok:start", {
+      scheduledTiktokInteractionData,
+      activeDevices,
+    });
+
     toast.success(
       `Interacción de ${
         activeTab === "tiktok" ? "TikTok" : "Facebook"
       } iniciada correctamente`
     );
+  };
 
-    //Filtrar dispositivos conectados
-    const activeDevices = devices.filter(
-      (device) => device.status === "ACTIVO"
-    );
-    console.log(activeDevices);
-    console.log(scheduledTiktokData);
+  //Funcion para editar interaccion
+  const handleEditScheduledTiktokInteraction = async (
+    id: number,
+    interactionEdited: TikTokInteractionForm
+  ) => {
+    console.log("Datos editados", interactionEdited);
 
-    console.log("enviando datos a socket io... ");
+    const res = await editInteractionTiktokData(id, interactionEdited);
 
-    const socket = getSocket();
+    if (res?.error) {
+      toast.error(`Error al editar: ${res.message}`);
+    }
 
-    // Enviar los datos al servidor
-    socket.emit("schedule:tiktok:start", {
-      scheduledTiktokData,
-      activeDevices,
-    });
+    //Actualizar datos del servidor
+    await loadData();
 
-    // Limpiar el formulario después de enviarlo
-    form.reset(); // Restablece todos los valores del formulario
+    toast.success("Editado correctamente");
+  };
+
+  //Funcion para eliminar interaccion
+  const handleDeleteScheduledTiktokInteraction = async (id: number) => {
+    const res = await deleteInteractionTiktokData(id);
+
+    if (res?.error) {
+      toast.error(`Error al eliminar: ${res.message}`);
+    }
+
+    //Actualizar datos del servidor
+    await loadData();
+
+    toast.success("Eliminado correctamente");
   };
 
   return (
@@ -139,10 +230,7 @@ export function ScheduleInteractionsForm() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
+                <form className="space-y-8">
                   <FormField
                     control={form.control}
                     name="video_url"
@@ -162,94 +250,62 @@ export function ScheduleInteractionsForm() {
                     )}
                   />
 
+                  <p className="text-base">¿Qué acciones quieres realizar?</p>
+
                   <FormField
                     control={form.control}
-                    name="items"
-                    render={() => (
-                      <FormItem>
-                        <div className="mb-4">
-                          <FormLabel className="text-base">
-                            ¿Qué acciones quieres realizar?
-                          </FormLabel>
-                          <FormDescription>
-                            Alguna descripcion o borrame
-                          </FormDescription>
-                        </div>
-                        {interactionsTiktokItems.map((item) => (
-                          <FormField
-                            key={item.id}
-                            control={form.control}
-                            name="items"
-                            render={({ field }) => {
-                              return (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      id="tiktok-like"
-                                      checked={field.value?.includes(item.id)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([
-                                              ...field.value,
-                                              item.id,
-                                            ])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {item.label}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
+                    name="liked"
+                    render={({ field }) => (
+                      <FormItem className="flex">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
                           />
-                        ))}
+                        </FormControl>
+                        <FormLabel className="font-normal">Me gusta</FormLabel>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="tiktok-comment"
-                      checked={addComment}
-                      onCheckedChange={(checked) => {
-                        if (typeof checked === "boolean")
-                          setAddComment(checked);
-                      }}
-                    />
-                    <Label htmlFor="tiktok-comment" className="font-normal">
-                      Comentar (Opcional)
-                    </Label>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="saved"
+                    render={({ field }) => (
+                      <FormItem className="flex">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Guardar video
+                        </FormLabel>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  {addComment && (
-                    <FormField
-                      control={form.control}
-                      name="comment"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Escribe el comentario a publicar
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              id="tiktok-comment-text"
-                              placeholder="Escribe......"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>alguna descripcion</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  <FormField
+                    control={form.control}
+                    name="comment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Escribe el comentario a publicar</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            id="tiktok-comment-text"
+                            placeholder="Escribe......"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>alguna descripcion</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
@@ -263,7 +319,6 @@ export function ScheduleInteractionsForm() {
                           <Input
                             id="tiktok-views"
                             type="number"
-                            min="0"
                             placeholder="100"
                             value={field.value ?? ""}
                             onChange={(e) =>
@@ -288,10 +343,18 @@ export function ScheduleInteractionsForm() {
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-black hover:bg-black/40 text-white"
               >
-                Iniciar Interacciones
+                Programar Interacción
               </Button>
             </CardFooter>
           </Card>
+          {scheduledTiktokInteractions.length > 0 && (
+            <ScheduledTiktokInteractions
+              scheduledTiktokInteractions={scheduledTiktokInteractions}
+              onExecuteInteraction={handleExecuteScheduledTiktokInteraction}
+              onEditInteraction={handleEditScheduledTiktokInteraction}
+              onDeleteInteraction={handleDeleteScheduledTiktokInteraction}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="facebook"></TabsContent>

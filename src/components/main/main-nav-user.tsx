@@ -22,7 +22,9 @@ import {
 } from "@/components/ui/sidebar";
 import { logout } from "@/app/login/logout.api";
 
-import { disconnectSocket, getSocket } from "@/lib/socket/socketClient";
+import { disconnectSocket } from "@/lib/socket/socketClient";
+import { useContext } from "react";
+import { SocketContext } from "@/context/SocketContext";
 
 export function MainNavUser({
   user,
@@ -36,25 +38,23 @@ export function MainNavUser({
 
   const router = useRouter();
 
+  const { socket } = useContext(SocketContext);
+
   const handleLogout = async () => {
-    const socket = getSocket();
+    if (socket) {
+      console.log("cerrando sesion");
+      socket.emit("cerrarSesion");
+      //Cerrar sesión socket io
+      disconnectSocket();
+    }
 
-    socket.emit("cerrarSesion");
-
-    //Cerrar sesión socket io
-    disconnectSocket();
-
-    //Eliminar usuario_id
+    //Eliminar las cookies
     Cookies.remove("user_id", { path: "/" });
-
-    //Eliminar email
     Cookies.remove("email", { path: "/" });
 
-    //Cerrar sesion
+    //Cerrar sesion del backend
     const res = await logout();
-
     const data = await res.json();
-
     console.log(data.message);
 
     router.push("/login");
