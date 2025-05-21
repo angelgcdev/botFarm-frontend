@@ -12,7 +12,30 @@ type ScheduleTiktokStatusData = {
   error?: string;
 };
 
+type NotificacionData = {
+  type: "info" | "success" | "warning" | "error";
+  message: string;
+};
+
 const socketDeviceConnectionNotification = (socket: Socket) => {
+  const handleNotification = (data: NotificacionData) => {
+    switch (data.type) {
+      case "success":
+        toast.success(data.message, { duration: 8000 });
+        break;
+      case "error":
+        toast.error(data.message, { duration: 8000 });
+        break;
+      case "warning":
+        toast.warning(data.message, { duration: 8000 });
+        break;
+      case "info":
+      default:
+        toast.info(data.message, { duration: 8000 });
+        break;
+    }
+  };
+
   const handleDeviceConnected = (udid: string) => {
     console.log("Dispositivo conectado: ", udid);
     toast.info(`Dispositivo conectado: ${udid}`);
@@ -34,6 +57,9 @@ const socketDeviceConnectionNotification = (socket: Socket) => {
       }
     );
   };
+
+  socket.off("notification", handleNotification);
+  socket.on("notification", handleNotification);
 
   socket.off("device:connected:notification", handleDeviceConnected);
   socket.on("device:connected:notification", handleDeviceConnected);

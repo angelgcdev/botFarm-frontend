@@ -25,6 +25,7 @@ import { logout } from "@/app/login/logout.api";
 import { disconnectSocket } from "@/lib/socket/socketClient";
 import { useContext } from "react";
 import { SocketContext } from "@/context/SocketContext";
+import { updateAllStatus } from "@/app/main/devices/api";
 
 export function MainNavUser({
   user,
@@ -41,23 +42,33 @@ export function MainNavUser({
   const { socket } = useContext(SocketContext);
 
   const handleLogout = async () => {
-    if (socket) {
-      console.log("cerrando sesion");
-      socket.emit("cerrarSesion");
-      //Cerrar sesión socket io
-      disconnectSocket();
+    try {
+      //1. Actualizar estado de dispositivos
+      const updateRes = await updateAllStatus();
+      console.log("Dispositivos actualizados:", updateRes.message);
+
+      // 2. Cerrar sesión en Socket.IO si esta activo
+      if (socket) {
+        console.log("cerrando sesion");
+        socket.emit("cerrarSesion");
+        //Cerrar sesión socket io
+        disconnectSocket();
+      }
+
+      // 3. Eliminar cookies
+      Cookies.remove("user_id", { path: "/" });
+      Cookies.remove("email", { path: "/" });
+
+      // 4. Cerrar sesion del backend
+      const res = await logout();
+      const data = await res.json();
+      console.log(data.message);
+
+      // 5. Redirigir al login
+      router.push("/login");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
     }
-
-    //Eliminar las cookies
-    Cookies.remove("user_id", { path: "/" });
-    Cookies.remove("email", { path: "/" });
-
-    //Cerrar sesion del backend
-    const res = await logout();
-    const data = await res.json();
-    console.log(data.message);
-
-    router.push("/login");
   };
 
   return (

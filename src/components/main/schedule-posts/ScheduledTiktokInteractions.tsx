@@ -11,13 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScheduledTiktokInteraction } from "@/app/main/schedule-posts/types";
 import { TikTokScriptLoader } from "@/app/main/schedule-posts/TiktokScriptLoader";
-import { Trash2, SquarePen } from "lucide-react";
-import { EditModal } from "./EditModal";
+import { Trash2, SquarePen, Loader2 } from "lucide-react";
+import { EditModal, TikTokInteractionForm } from "./EditModal";
+import { useContext, useEffect, useState } from "react";
+import { SocketContext } from "@/context/SocketContext";
+import { toast } from "sonner";
 
 type Props = {
   scheduledTiktokInteractions: ScheduledTiktokInteraction[];
-  onExecuteInteraction: (interaction: ScheduledTiktokInteraction) => void;
-  onEditInteraction: () => void;
+  onExecuteInteraction: (
+    interaction: ScheduledTiktokInteraction
+  ) => Promise<boolean>;
+  onEditInteraction: (
+    id: number,
+    interactionEdited: TikTokInteractionForm
+  ) => Promise<void>;
   onDeleteInteraction: (id: number) => void;
 };
 
@@ -27,6 +35,29 @@ const ScheduledTiktokInteractions = ({
   onEditInteraction,
   onDeleteInteraction,
 }: Props) => {
+  //
+  const { socket } = useContext(SocketContext);
+
+  //Estado para evitar multiples ejecuciones
+  const [executingInteractionId, setExecutingInteractionId] = useState<
+    number | null
+  >(null);
+
+  //Liberar el bloqueo de las interacciones
+  useEffect(() => {
+    if (!socket) {
+      toast.error("No hay conexión con el servidor.");
+      return;
+    }
+    socket.on("interaction:completed", () => {
+      setExecutingInteractionId(null);
+    });
+
+    return () => {
+      socket.off("interaction:completed");
+    };
+  }, [socket]);
+
   //
   if (scheduledTiktokInteractions.length === 0) {
     return null;
@@ -48,28 +79,44 @@ const ScheduledTiktokInteractions = ({
         justifyContent: "center",
       }}
     >
-      <TikTokScriptLoader />
-
+      <TikTokScriptLoader reloadTrigger={scheduledTiktokInteractions} />
       {scheduledTiktokInteractions.map((interaction, index) => (
         <Card key={interaction.id}>
           <CardHeader>
             <CardTitle>Interacción #{index + 1}</CardTitle>
           </CardHeader>
           <CardContent>
-            <blockquote
-              className="tiktok-embed"
-              cite={interaction.video_url}
-              data-video-id={getDataVideoId(interaction.video_url)}
-              style={{
-                width: "100%",
-                height: "750px",
-                borderRadius: "7px",
-                overflow: "hidden",
-              }}
-              data-embed-type="video"
-            >
-              <section>Loading...</section>
-            </blockquote>
+            <div className="relative">
+              <blockquote
+                className="tiktok-embed"
+                cite={interaction.video_url}
+                data-video-id={getDataVideoId(interaction.video_url)}
+                style={{
+                  width: "100%",
+                  height: "750px",
+                  borderRadius: "7px",
+                  overflow: "hidden",
+                  margin: "initial",
+                }}
+                data-embed-type="video"
+              >
+                <section>Loading...</section>
+              </blockquote>
+
+              <div
+                className={`absolute inset-0 flex flex-col items-center justify-center z-10 rounded-md
+        bg-black/70  transition-opacity duration-200 
+        ${
+          interaction.status === "EN_PROGRESO"
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
+        }
+      `}
+              >
+                <Loader2 className="h-10 w-10 animate-spin text-blue-100" />
+                <p className="mt-4 text-[24px] text-blue-100">Ejecutando...</p>
+              </div>
+            </div>
 
             <p>
               Acciones:
@@ -90,7 +137,7 @@ const ScheduledTiktokInteractions = ({
             <p>Cantidad de vistas: {interaction.views_count}</p>
 
             <p>
-              Estado:
+              Estado:{" "}
               {interaction.status === "PENDIENTE" ? (
                 <Badge
                   className="bg-yellow-100 text-yellow-800 border border-yellow-300"
@@ -121,7 +168,20 @@ const ScheduledTiktokInteractions = ({
             <Button
               variant="default"
               className="cursor-pointer"
-              onClick={() => onExecuteInteraction(interaction)}
+              // className="cursor-pointer bg-[#007BFF] hover:bg-[#0056b3] text-white"
+              onClick={async () => {
+                if (executingInteractionId === null) {
+                  const executed = await onExecuteInteraction(interaction);
+                  if (executed) {
+                    setExecutingInteractionId(interaction.id);
+                  }
+                }
+              }}
+              disabled={
+                interaction.status === "EN_PROGRESO" ||
+                (executingInteractionId !== null &&
+                  executingInteractionId !== interaction.id)
+              }
             >
               Ejecutar Interacción
             </Button>
@@ -132,7 +192,16 @@ const ScheduledTiktokInteractions = ({
                 onEditInteraction={onEditInteraction}
                 index={index}
                 trigger={
-                  <Button variant="outline" className="cursor-pointer">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    // className="cursor-pointer bg-[#FFC107] hover:bg-[#e0a800] text-black"
+                    disabled={
+                      interaction.status === "EN_PROGRESO" ||
+                      (executingInteractionId !== null &&
+                        executingInteractionId !== interaction.id)
+                    }
+                  >
                     <SquarePen />
                   </Button>
                 }
@@ -140,8 +209,14 @@ const ScheduledTiktokInteractions = ({
 
               <Button
                 variant="outline"
-                className="cursor-pointer "
+                className="cursor-pointer"
+                // className="cursor-pointer bg-[#DC3545] hover:bg-[#c82333] text-white"
                 onClick={() => onDeleteInteraction(interaction.id)}
+                disabled={
+                  interaction.status === "EN_PROGRESO" ||
+                  (executingInteractionId !== null &&
+                    executingInteractionId !== interaction.id)
+                }
               >
                 <Trash2 />
               </Button>

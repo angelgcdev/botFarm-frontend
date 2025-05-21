@@ -153,6 +153,11 @@ export function ScheduleInteractionsForm() {
     console.log("Dispositivos activos:", activeDevices);
     console.log("Datos de la interaccion", scheduledTiktokInteractionData);
 
+    if (activeDevices.length === 0) {
+      toast.warning("🚨 No se encontraron dispositivos conectados.");
+      return false;
+    }
+
     console.log("enviando datos a socket io... ");
 
     // Enviar los datos al servidor
@@ -166,6 +171,8 @@ export function ScheduleInteractionsForm() {
         activeTab === "tiktok" ? "TikTok" : "Facebook"
       } iniciada correctamente`
     );
+
+    return true;
   };
 
   //Funcion para editar interaccion

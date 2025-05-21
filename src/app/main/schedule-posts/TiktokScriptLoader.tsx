@@ -1,17 +1,32 @@
 import { useEffect } from "react";
 
-export function TikTokScriptLoader() {
+export function TikTokScriptLoader({
+  reloadTrigger,
+}: {
+  reloadTrigger: unknown;
+}) {
   useEffect(() => {
-    // Verificamos si el script ya está agregado para no duplicarlo
-    if (
-      !document.querySelector('script[src="https://www.tiktok.com/embed.js"]')
-    ) {
-      const script = document.createElement("script");
-      script.src = "https://www.tiktok.com/embed.js";
-      script.async = true;
-      document.body.appendChild(script);
+    // Eliminar cualquier script anterior solo si existe y tiene el mismo src
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[src="https://www.tiktok.com/embed.js"]'
+    );
+
+    if (existingScript) {
+      existingScript.remove();
     }
-  }, []);
+
+    // Crear un nuevo script de TikTok
+    const script = document.createElement("script");
+    script.src = "https://www.tiktok.com/embed.js";
+    script.async = true;
+    script.defer = true; // (opcional, ayuda con carga no bloqueante)
+    document.body.appendChild(script);
+
+    // Cleanup por si el componente se desmonta
+    return () => {
+      script.remove();
+    };
+  }, [reloadTrigger]);
 
   return null; // No renderiza nada visible
 }
