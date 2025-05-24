@@ -58,8 +58,8 @@ const socketDeviceConnectionNotification = (socket: Socket) => {
     );
   };
 
-  socket.off("notification", handleNotification);
-  socket.on("notification", handleNotification);
+  socket.off("notification:frontend", handleNotification);
+  socket.on("notification:frontend", handleNotification);
 
   socket.off("device:connected:notification", handleDeviceConnected);
   socket.on("device:connected:notification", handleDeviceConnected);

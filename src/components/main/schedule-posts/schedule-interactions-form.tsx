@@ -208,6 +208,13 @@ export function ScheduleInteractionsForm() {
     toast.success("Eliminado correctamente");
   };
 
+  //Funcion para cancelar la interaccion
+  const handleCancelScheduledTiktokInteraction = async (
+    interaction_id: number
+  ) => {
+    socket.emit("cancel:tiktok:interaction", interaction_id);
+  };
+
   return (
     <>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -360,6 +367,7 @@ export function ScheduleInteractionsForm() {
               onExecuteInteraction={handleExecuteScheduledTiktokInteraction}
               onEditInteraction={handleEditScheduledTiktokInteraction}
               onDeleteInteraction={handleDeleteScheduledTiktokInteraction}
+              onCancelInteraction={handleCancelScheduledTiktokInteraction}
             />
           )}
         </TabsContent>

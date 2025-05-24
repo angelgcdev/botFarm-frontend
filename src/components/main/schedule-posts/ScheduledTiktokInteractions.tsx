@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScheduledTiktokInteraction } from "@/app/main/schedule-posts/types";
 import { TikTokScriptLoader } from "@/app/main/schedule-posts/TiktokScriptLoader";
-import { Trash2, SquarePen, Loader2 } from "lucide-react";
+import { Trash2, SquarePen, Loader2, Ban } from "lucide-react";
 import { EditModal, TikTokInteractionForm } from "./EditModal";
 import { useContext, useEffect, useState } from "react";
 import { SocketContext } from "@/context/SocketContext";
@@ -27,6 +27,7 @@ type Props = {
     interactionEdited: TikTokInteractionForm
   ) => Promise<void>;
   onDeleteInteraction: (id: number) => void;
+  onCancelInteraction: (id: number) => void;
 };
 
 const ScheduledTiktokInteractions = ({
@@ -34,14 +35,12 @@ const ScheduledTiktokInteractions = ({
   onExecuteInteraction,
   onEditInteraction,
   onDeleteInteraction,
+  onCancelInteraction,
 }: Props) => {
   //
   const { socket } = useContext(SocketContext);
 
-  //Estado para evitar multiples ejecuciones
-  const [executingInteractionId, setExecutingInteractionId] = useState<
-    number | null
-  >(null);
+  const [cancelingIds, setCancelingIds] = useState<number[]>([]);
 
   //Liberar el bloqueo de las interacciones
   useEffect(() => {
@@ -49,12 +48,17 @@ const ScheduledTiktokInteractions = ({
       toast.error("No hay conexión con el servidor.");
       return;
     }
-    socket.on("interaction:completed", () => {
-      setExecutingInteractionId(null);
+    // socket.on("interaction:completed", () => {
+    //   setExecutingInteractionId(null);
+    // });
+
+    socket.on("interaction:canceled", () => {
+      setCancelingIds([]);
     });
 
     return () => {
       socket.off("interaction:completed");
+      socket.off("interaction:canceled");
     };
   }, [socket]);
 
@@ -68,6 +72,11 @@ const ScheduledTiktokInteractions = ({
     const videoId = match ? match[2] : null;
     return videoId;
   };
+
+  //En el frontend, deshabilita todos los botones si cualquier interacción está en progreso:
+  const anyExecuting = scheduledTiktokInteractions.some(
+    (interaction) => interaction.status === "EN_PROGRESO"
+  );
 
   return (
     <div
@@ -115,6 +124,20 @@ const ScheduledTiktokInteractions = ({
               >
                 <Loader2 className="h-10 w-10 animate-spin text-blue-100" />
                 <p className="mt-4 text-[24px] text-blue-100">Ejecutando...</p>
+              </div>
+
+              <div
+                className={`absolute inset-0 flex flex-col items-center justify-center z-10 rounded-md
+        bg-black/70  transition-opacity duration-200 
+        ${
+          cancelingIds.includes(interaction.id)
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
+        }
+      `}
+              >
+                <Loader2 className="h-10 w-10 animate-spin text-blue-100" />
+                <p className="mt-4 text-[24px] text-blue-100">Cancelando...</p>
               </div>
             </div>
 
@@ -170,18 +193,9 @@ const ScheduledTiktokInteractions = ({
               className="cursor-pointer"
               // className="cursor-pointer bg-[#007BFF] hover:bg-[#0056b3] text-white"
               onClick={async () => {
-                if (executingInteractionId === null) {
-                  const executed = await onExecuteInteraction(interaction);
-                  if (executed) {
-                    setExecutingInteractionId(interaction.id);
-                  }
-                }
+                await onExecuteInteraction(interaction);
               }}
-              disabled={
-                interaction.status === "EN_PROGRESO" ||
-                (executingInteractionId !== null &&
-                  executingInteractionId !== interaction.id)
-              }
+              disabled={anyExecuting || interaction.status === "EN_PROGRESO"}
             >
               Ejecutar Interacción
             </Button>
@@ -197,9 +211,7 @@ const ScheduledTiktokInteractions = ({
                     className="cursor-pointer"
                     // className="cursor-pointer bg-[#FFC107] hover:bg-[#e0a800] text-black"
                     disabled={
-                      interaction.status === "EN_PROGRESO" ||
-                      (executingInteractionId !== null &&
-                        executingInteractionId !== interaction.id)
+                      anyExecuting && interaction.status !== "EN_PROGRESO"
                     }
                   >
                     <SquarePen />
@@ -211,12 +223,25 @@ const ScheduledTiktokInteractions = ({
                 variant="outline"
                 className="cursor-pointer"
                 // className="cursor-pointer bg-[#DC3545] hover:bg-[#c82333] text-white"
-                onClick={() => onDeleteInteraction(interaction.id)}
+                onClick={() => {
+                  setCancelingIds((prev) => [...prev, interaction.id]);
+                  onCancelInteraction(interaction.id);
+                }}
                 disabled={
-                  interaction.status === "EN_PROGRESO" ||
-                  (executingInteractionId !== null &&
-                    executingInteractionId !== interaction.id)
+                  interaction.status === "PENDIENTE" ||
+                  interaction.status === "COMPLETADA" ||
+                  interaction.status === "CANCELADO"
                 }
+              >
+                <Ban />
+              </Button>
+
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                // className="cursor-pointer bg-[#DC3545] hover:bg-[#c82333] text-white"
+                onClick={() => onDeleteInteraction(interaction.id)}
+                disabled={anyExecuting && interaction.status !== "EN_PROGRESO"}
               >
                 <Trash2 />
               </Button>

@@ -2,7 +2,8 @@ export type InteractionStatus =
   | "PENDIENTE"
   | "EN_PROGRESO"
   | "COMPLETADA"
-  | "FALLIDA";
+  | "FALLIDA"
+  | "CANCELADO";
 
 export interface ScheduledTiktokInteraction {
   id: number;
