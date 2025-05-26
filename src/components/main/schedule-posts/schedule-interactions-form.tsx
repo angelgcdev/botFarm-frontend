@@ -357,7 +357,7 @@ export function ScheduleInteractionsForm() {
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-black hover:bg-black/40 text-white"
               >
-                Programar Interacción
+                Crear Interacción
               </Button>
             </CardFooter>
           </Card>

@@ -1,12 +1,16 @@
+export type DeviceStatus = "ACTIVO" | "INACTIVO";
+
+export type DevieType = "FISICO" | "EMULADOR";
+
 export interface Device {
-  connected_at: string;
-  device_type: string;
   id: number;
-  last_activity: string | null;
-  brand: string;
-  status: string;
-  udid: string;
   user_id: number;
+  udid: string;
+  device_type: DevieType;
+  status: DeviceStatus;
   os_version: string;
+  brand: string;
+  connected_at: Date;
+  last_activity: Date;
   complete_config: boolean;
 }

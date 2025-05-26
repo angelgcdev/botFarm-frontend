@@ -182,6 +182,13 @@ const ScheduledTiktokInteractions = ({
                 >
                   Completada
                 </Badge>
+              ) : interaction.status === "CANCELADO" ? (
+                <Badge
+                  className="bg-red-100 text-red-800 border border-red-300"
+                  variant="outline"
+                >
+                  Cancelado
+                </Badge>
               ) : (
                 <Badge variant="destructive">Fallida</Badge>
               )}
