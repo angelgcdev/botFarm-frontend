@@ -54,15 +54,6 @@ export function iniciarSocketClient(user_id: number): Socket | null {
   return socket;
 }
 
-// export const getSocket = (): Socket => {
-//   if (!socket) {
-//     throw new Error(
-//       "Socket no ha sido inicializado. Llama a iniciarSocketClient() primero."
-//     );
-//   }
-//   return socket;
-// };
-
 export function disconnectSocket() {
   if (socket) {
     socket.disconnect();

@@ -8,65 +8,90 @@ type TiktokInteractionForm = {
   comment?: string;
 };
 
+const getInteractionsTiktokData = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/schedule`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+
+    const data = await res.json();
+
+    return {
+      ok: true,
+      data,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
+    };
+  }
+};
+
 const createInteractionTiktokData = async (
   scheduledTiktokDataForm: TiktokInteractionForm
 ) => {
-  console.log(scheduledTiktokDataForm);
-
   try {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/schedule`, {
       method: "POST",
-      credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(scheduledTiktokDataForm),
     });
 
-    console.log("Create:", res);
-
     if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`HTTP ${res.status} - ${errorBody}`);
+      const error = await res.json();
+      throw new Error(error.message);
     }
 
-    const resData = await res.json();
+    const data = await res.json();
 
-    return resData;
-  } catch (error) {
-    console.error("Error al crear la interaccion de tiktok:", error);
     return {
-      error: true,
-      message: error instanceof Error ? error.message : "Unknown error",
+      ok: true,
+      data,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
     };
   }
 };
 
 const deleteInteractionTiktokData = async (id: number) => {
   try {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/schedule/${id}`, {
       method: "DELETE",
-      credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log("Delete:", res);
-
     if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`HTTP ${res.status} - ${errorBody}`);
+      const error = await res.json();
+      throw new Error(error.message);
     }
 
-    const resData = await res.json();
+    const data = await res.json();
 
-    return resData;
+    return { ok: true, data };
   } catch (error) {
-    console.error("Error al eliminar la interaccion de tiktok:", error);
     return {
-      error: true,
-      message: error instanceof Error ? error.message : "Unknown error",
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
     };
   }
 };
@@ -76,11 +101,12 @@ const editInteractionTiktokData = async (
   interactionEdited: TiktokInteractionForm
 ) => {
   try {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/schedule/${id}`, {
       method: "PATCH",
-      credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(interactionEdited),
     });
@@ -88,18 +114,17 @@ const editInteractionTiktokData = async (
     console.log("Edit:", res);
 
     if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`HTTP ${res.status} - ${errorBody}`);
+      const error = await res.json();
+      throw new Error(error.message);
     }
 
-    const resData = await res.json();
+    const data = await res.json();
 
-    return resData;
+    return { ok: true, data };
   } catch (error) {
-    console.error("Error al eliminar la interaccion de tiktok:", error);
     return {
-      error: true,
-      message: error instanceof Error ? error.message : "Unknown error",
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
     };
   }
 };
@@ -108,4 +133,5 @@ export {
   deleteInteractionTiktokData,
   editInteractionTiktokData,
   createInteractionTiktokData,
+  getInteractionsTiktokData,
 };

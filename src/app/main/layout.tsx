@@ -13,21 +13,25 @@ export default function ProtectedLayout({
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
     const checkAuth = async () => {
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`,
           {
-            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
-        console.log("Response:", res);
         if (!res.ok) {
           router.push("/login");
-        } else {
-          setIsAuthChecked(true); // Solo mostrar hijos si está autenticado
+          return;
         }
+
+        setIsAuthChecked(true); // Solo mostrar hijos si está autenticado
       } catch (err) {
         router.push("/login");
         console.log(err);

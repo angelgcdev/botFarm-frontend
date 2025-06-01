@@ -39,13 +39,13 @@ import { DevicesContext } from "@/context/DevicesContext";
 import { TikTokIcon } from "../../icons/tiktok-icon";
 import { FacebookIcon } from "../../icons/facebook-icon";
 import { ScheduledTiktokInteractions } from "./ScheduledTiktokInteractions";
-import { getInteractionsTiktokData } from "@/app/main/schedule-posts/getInteractionsTiktokData.api";
 import { ScheduledTiktokInteraction } from "@/app/main/schedule-posts/types";
 import { SocketContext } from "@/context/SocketContext";
 import {
   createInteractionTiktokData,
   deleteInteractionTiktokData,
   editInteractionTiktokData,
+  getInteractionsTiktokData,
 } from "@/app/main/schedule-posts/api";
 
 const tiktokInteractionSchema = z.object({
@@ -94,12 +94,13 @@ export function ScheduleInteractionsForm() {
 
   //obtener datos
   const loadData = async () => {
-    const interacciones = await getInteractionsTiktokData();
-    console.log(
-      "Datos de la tabla de schedule_tiktok_interactions:",
-      interacciones
-    );
-    setscheduledTiktokInteractions(interacciones);
+    const res = await getInteractionsTiktokData();
+    if (!res.ok) {
+      toast.error(res.message);
+      return;
+    }
+
+    setscheduledTiktokInteractions(res.data);
   };
 
   //Obtener datos de los dispositivos mediante useContext
@@ -130,8 +131,8 @@ export function ScheduleInteractionsForm() {
 
     const res = await createInteractionTiktokData(scheduledTiktokDataForm);
 
-    if (res?.error) {
-      toast.error(`Error al crear la interacción: ${res.message}`);
+    if (!res.ok) {
+      toast.error(res.message);
     }
 
     //Actualizar datos del servidor
@@ -180,12 +181,13 @@ export function ScheduleInteractionsForm() {
     id: number,
     interactionEdited: TikTokInteractionForm
   ) => {
-    console.log("Datos editados", interactionEdited);
-
     const res = await editInteractionTiktokData(id, interactionEdited);
 
-    if (res?.error) {
-      toast.error(`Error al editar: ${res.message}`);
+    console.log(res);
+
+    if (!res.ok) {
+      toast.error(res.message);
+      return;
     }
 
     //Actualizar datos del servidor
@@ -198,8 +200,9 @@ export function ScheduleInteractionsForm() {
   const handleDeleteScheduledTiktokInteraction = async (id: number) => {
     const res = await deleteInteractionTiktokData(id);
 
-    if (res?.error) {
-      toast.error(`Error al eliminar: ${res.message}`);
+    if (!res.ok) {
+      toast.error(res.message);
+      return;
     }
 
     //Actualizar datos del servidor

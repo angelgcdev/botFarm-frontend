@@ -26,8 +26,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getTiktokHistory } from "@/app/main/history/getTiktokHistory.api";
+import { getTiktokHistory } from "@/app/main/history/api";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 enum TiktokInteractionStatus {
   COMPLEATADA = "COMPLETADA",
@@ -60,18 +61,20 @@ export function HistoryInteractions() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const data = await getTiktokHistory();
-        setTiktokHistoryData(data);
-      } catch (error) {
-        console.error("Error al obtener historial de tiktok.", error);
+      const res = await getTiktokHistory();
+
+      console.log(res);
+
+      if (!res.ok) {
+        toast.error(res.message);
+        return;
       }
+
+      setTiktokHistoryData(res.data);
     };
 
     fetchData();
   }, []);
-
-  console.log(tiktokHistoryData);
 
   return (
     <Card className="w-full">

@@ -1,6 +1,5 @@
 "use client";
 
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
 
@@ -20,7 +19,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { logout } from "@/app/login/logout.api";
 
 import { disconnectSocket } from "@/lib/socket/socketClient";
 import { useContext } from "react";
@@ -56,15 +54,11 @@ export function MainNavUser({
       }
 
       // 3. Eliminar cookies
-      Cookies.remove("user_id", { path: "/" });
-      Cookies.remove("email", { path: "/" });
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("email");
 
-      // 4. Cerrar sesion del backend
-      const res = await logout();
-      const data = await res.json();
-      console.log(data.message);
-
-      // 5. Redirigir al login
+      // 4. Redirigir al login
       router.push("/login");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

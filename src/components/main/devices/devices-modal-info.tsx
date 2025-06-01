@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "../../ui/dialog";
 import { DeviceForm } from "./device-form";
-import { getInfoDevice } from "@/app/main/devices/getInfoDevice.api";
+import { getInfoDevice } from "@/app/main/devices/api";
 
 interface ModalDeviceInfoProps {
   children: ReactNode;
@@ -44,11 +44,15 @@ export function DevicesModalInfo({
     const fetchInitialData = async () => {
       if (open) {
         try {
-          const data = await getInfoDevice(deviceId);
+          const res = await getInfoDevice(deviceId);
 
-          console.log(data);
+          if (!res.ok) {
+            console.error(res.message);
+            return;
+          }
 
-          console.log(Array.isArray(data?.cuenta_red_social));
+          const data = res.data;
+
           if (
             data?.cuentaGoogle?.email &&
             Array.isArray(data?.cuenta_red_social)
@@ -85,9 +89,7 @@ export function DevicesModalInfo({
     if (infoCompletada) {
       fetchInitialData();
     }
-  }, [open, deviceId]);
-
-  console.log("Initial Data: ", initialData);
+  }, [open, deviceId, infoCompletada]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -1,13 +1,12 @@
 // app/main/ClientUserSender.tsx
 "use client";
 import { useEffect } from "react";
-import Cookies from "js-cookie";
 import { sendUserIdApi } from "@/app/login/localBackend.api";
 
 const SendUserIdOnLoad = () => {
   useEffect(() => {
     const sendUserId = async () => {
-      const user_id = Number(Cookies.get("user_id"));
+      const user_id = Number(localStorage.getItem("userId"));
 
       if (!user_id) {
         console.error("No se encontro el user_id en las cookies");
@@ -19,8 +18,17 @@ const SendUserIdOnLoad = () => {
 
       //Verificar si el envio fue exitoso
       if (!res.ok) {
-        console.error("Envio de datos fallido: ", res);
+        console.error(
+          "Envio de datos al servidor local fallido: ",
+          res.message
+        );
       }
+
+      const restData = res.data;
+      console.log(
+        "Se enviaron datos al servidor local exitosamente:",
+        restData
+      );
     };
     sendUserId();
   }, []);

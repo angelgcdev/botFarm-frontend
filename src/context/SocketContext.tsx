@@ -3,7 +3,6 @@
 import { createContext, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { iniciarSocketClient } from "@/lib/socket/socketClient";
-import Cookies from "js-cookie";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -17,7 +16,7 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const user_id = Number(Cookies.get("user_id"));
+    const user_id = Number(localStorage.getItem("userId"));
 
     if (!user_id || isNaN(user_id)) {
       console.error("user_id invalido para iniciar sesion Socket.IO");

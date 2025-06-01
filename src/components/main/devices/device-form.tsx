@@ -21,8 +21,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { completeInfoDevice } from "@/app/main/devices/completeInfoDevice.api";
-import { updateInfoDevice } from "@/app/main/devices/updateInfoDevice.api";
+import { completeInfoDevice } from "@/app/main/devices/api";
+import { updateInfoDevice } from "@/app/main/devices/api";
 
 // 4. Imports relativos
 import { Input } from "../../ui/input";
@@ -88,43 +88,38 @@ export function DeviceForm({
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
-      const payload = { ...data, dispositivo_id: deviceId };
+      const infoDevice = { ...data, dispositivo_id: deviceId };
 
-      console.log(payload);
+      console.log(infoDevice);
 
       if (initialData) {
-        const resUpdate = await updateInfoDevice(payload);
+        const res = await updateInfoDevice(infoDevice);
 
-        if (resUpdate.status) {
-          toast.success("Datos actualizados correctamente:", {
-            description: resUpdate.message,
-          });
+        console.log(res);
 
-          //Cerramos el modal
-          onClose();
-        } else {
-          toast.error("Error al actualizar", {
-            description: resUpdate.message || "Ocurrió un error inesperado",
-          });
+        if (!res.ok) {
+          toast.error(res.message);
+          return;
         }
+
+        toast.success(res.data.message);
+        //Cerramos el modal
+        onClose();
       } else {
-        const res = await completeInfoDevice(payload);
+        const res = await completeInfoDevice(infoDevice);
 
-        if (res.status) {
-          toast.success("Datos enviados correctamente:", {
-            description: res.message,
-          });
-
-          //Marcar el boton como completado
-          onComplete?.();
-
-          //Cerramos el modal
-          onClose();
-        } else {
-          toast.error("Error al registrar", {
-            description: res.message || "Ocurrió un error inesperado",
-          });
+        if (!res.ok) {
+          toast.error(res.message);
+          return;
         }
+
+        toast.success(res.data.message);
+
+        //Marcar el boton como completado
+        onComplete?.();
+
+        //Cerramos el modal
+        onClose();
       }
     } catch (error) {
       toast.error("Fallo la conexión", {

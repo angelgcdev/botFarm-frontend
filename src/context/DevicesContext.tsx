@@ -4,6 +4,7 @@ import { createContext, useEffect, useState, useContext } from "react";
 import { Device } from "@/types/device";
 import { getAllDevices } from "@/app/main/devices/api";
 import { SocketContext } from "@/context/SocketContext";
+import { toast, Toaster } from "sonner";
 
 //1. Crear el contexto
 const DevicesContext = createContext<Device[]>([]);
@@ -16,8 +17,17 @@ const DevicesProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const fetchedDevices = await getAllDevices();
-        setDevices(fetchedDevices);
+        const res = await getAllDevices();
+
+        if (!res.ok) {
+          toast.error(res.message);
+          console.error("Error:", res.message);
+          return;
+        }
+
+        const resData = res.data;
+
+        setDevices(resData);
       } catch (error) {
         console.error("Error al obtener los dispositivos:", error);
       }
@@ -38,14 +48,17 @@ const DevicesProvider = ({ children }: { children: React.ReactNode }) => {
       socket.off("device:connected:notification", fetchDevices);
       socket.off("device:disconnected:notification", fetchDevices);
     };
-  }, []);
+  }, [socket]);
 
   console.log(devices);
 
   return (
-    <DevicesContext.Provider value={devices}>
-      {children}
-    </DevicesContext.Provider>
+    <>
+      <Toaster />
+      <DevicesContext.Provider value={devices}>
+        {children}
+      </DevicesContext.Provider>
+    </>
   );
 };
 

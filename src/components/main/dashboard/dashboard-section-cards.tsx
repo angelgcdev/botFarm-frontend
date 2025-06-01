@@ -1,10 +1,10 @@
 "use client";
 
-import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
+import { TrendingUpIcon } from "lucide-react";
 import { TikTokIcon } from "../../icons/tiktok-icon";
-import { FacebookIcon } from "../../icons/facebook-icon";
+// import { FacebookIcon } from "../../icons/facebook-icon";
 
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardDescription,
@@ -44,20 +44,32 @@ export function SectionCards() {
     const fetchData = async () => {
       try {
         //interacciones
-        const total = await getTotalTiktokInteractions();
-        setTotalTiktokInteractions(total);
+        const resTotal = await getTotalTiktokInteractions();
+        if (!resTotal.ok) {
+          console.error("Error:", resTotal.message);
+        }
+        setTotalTiktokInteractions(resTotal.data);
 
         // views
-        const totalViews = await getGeneratedViews();
-        setGeneratedViews(totalViews);
+        const resTotalViews = await getGeneratedViews();
+        if (!resTotalViews.ok) {
+          console.error("Error:", resTotalViews.message);
+        }
+        setGeneratedViews(resTotalViews.data);
 
         // likes
-        const totalLikes = await getGeneratedLikes();
-        setGeneratedLikes(totalLikes);
+        const resTotalLikes = await getGeneratedLikes();
+        if (!resTotalLikes.ok) {
+          console.error("Error:", resTotalLikes.message);
+        }
+        setGeneratedLikes(resTotalLikes.data);
 
         // comments
-        const totalComments = await getGeneratedComments();
-        setGeneratedComments(totalComments);
+        const resTotalComments = await getGeneratedComments();
+        if (!resTotalComments.ok) {
+          console.error("Error:", resTotalComments.message);
+        }
+        setGeneratedComments(resTotalComments.data);
       } catch (error) {
         console.error("Error al obtener los datos:", error);
         setTotalTiktokInteractions(0);

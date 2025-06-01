@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Device } from "@/types/device";
+import { Device, DeviceStatus } from "@/types/device";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -34,15 +34,12 @@ import { toast } from "sonner";
 export function DevicesCardInfo({ device }: { device: Device }) {
   const { socket } = useContext(SocketContext);
 
-  const [status, setStatus] = useState(device.status);
+  const [status, setStatus] = useState<DeviceStatus>(device.status);
 
   const [infoCompletada, setInfoCompletada] = useState<boolean>(
     device.complete_config
   );
   const router = useRouter();
-
-  console.log(device);
-  console.log("informacion completada:", infoCompletada);
 
   useEffect(() => {
     if (!socket) {
@@ -52,7 +49,7 @@ export function DevicesCardInfo({ device }: { device: Device }) {
 
     const handleDeviceConnectedStatus = (payload: {
       udid: string;
-      status: string;
+      status: DeviceStatus;
     }) => {
       if (payload.udid === device.udid) {
         setStatus(payload.status); // Cambia a "ACTIVO"
@@ -61,7 +58,7 @@ export function DevicesCardInfo({ device }: { device: Device }) {
 
     const handleDeviceDisconnectedStatus = (payload: {
       udid: string;
-      status: string;
+      status: DeviceStatus;
     }) => {
       if (payload.udid === device.udid) {
         setStatus(payload.status); // Cambia a "INACTIVO"
@@ -75,7 +72,7 @@ export function DevicesCardInfo({ device }: { device: Device }) {
       socket.off("device:connected:status", handleDeviceConnectedStatus);
       socket.off("device:disconnected:status", handleDeviceDisconnectedStatus);
     };
-  }, []);
+  }, [device.udid, socket]);
 
   const isActive = status === "ACTIVO";
 

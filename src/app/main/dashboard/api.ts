@@ -1,110 +1,114 @@
 const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const getTotalTiktokInteractions = async () => {
+  const token = localStorage.getItem("token");
   try {
     const res = await fetch(
       `${NEXT_PUBLIC_BACKEND_URL}/api/history/interactions/count`,
       {
-        credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`HTTP ${res.status} - ${errorBody}`);
+      const error = await res.json();
+      throw new Error(error.message);
     }
 
-    const resData = await res.json();
+    const data = await res.json();
 
-    if (!resData.success) {
-      throw new Error(resData.message || "Error en la respuesta del servidor");
-    }
-
-    return resData.data.count;
+    return { ok: true, data };
   } catch (error) {
-    console.error("Error al obtener la información", error);
-    throw error;
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
+    };
   }
 };
 
 const getGeneratedViews = async () => {
+  const token = localStorage.getItem("token");
   try {
     const res = await fetch(
       `${NEXT_PUBLIC_BACKEND_URL}/api/history/views/count`,
       {
-        credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`HTTP ${res.status} - ${errorBody}`);
+      const error = await res.json();
+      throw new Error(error.message);
     }
 
-    const resData = await res.json();
+    const data = await res.json();
 
-    if (!resData.success) {
-      throw new Error(resData.message || "Error en la respuesta del servidor");
-    }
-
-    return resData.data.count;
+    return { ok: true, data: data._sum.total_views };
   } catch (error) {
-    console.error("Error al obtener la información", error);
-    throw error;
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
+    };
   }
 };
 
 const getGeneratedLikes = async () => {
+  const token = localStorage.getItem("token");
   try {
     const res = await fetch(
       `${NEXT_PUBLIC_BACKEND_URL}/api/history/likes/count`,
       {
-        credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`HTTP ${res.status} - ${errorBody}`);
+      const error = await res.json();
+      throw new Error(error.message);
     }
 
-    const resData = await res.json();
+    const data = await res.json();
 
-    if (!resData.success) {
-      throw new Error(resData.message || "Error en la respuesta del servidor");
-    }
-
-    return resData.data.count;
+    return { ok: true, data };
   } catch (error) {
-    console.error("Error al obtener la información", error);
-    throw error;
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
+    };
   }
 };
 
 const getGeneratedComments = async () => {
+  const token = localStorage.getItem("token");
   try {
     const res = await fetch(
       `${NEXT_PUBLIC_BACKEND_URL}/api/history/comments/count`,
       {
-        credentials: "include", // 👈 IMPORTANTE: permite manejar cookies
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     if (!res.ok) {
-      const errorBody = await res.text();
-      throw new Error(`HTTP ${res.status} - ${errorBody}`);
+      const error = await res.json();
+      throw new Error(error.message);
     }
 
-    const resData = await res.json();
+    const data = await res.json();
 
-    if (!resData.success) {
-      throw new Error(resData.message || "Error en la respuesta del servidor");
-    }
-
-    return resData.data.count;
+    return { ok: true, data };
   } catch (error) {
-    console.error("Error al obtener la información", error);
-    throw error;
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
+    };
   }
 };
 

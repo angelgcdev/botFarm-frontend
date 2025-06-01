@@ -7,12 +7,8 @@ import {
   // LogOutIcon,
   SmartphoneIcon,
   // UserIcon,
+  CalendarRange,
 } from "lucide-react";
-import { TikTokIcon } from "@/components/icons/tiktok-icon";
-import { FacebookIcon } from "@/components/icons/facebook-icon";
-import { CalendarIcon } from "@/components/icons/calendar-icon";
-
-import { MainNavDocuments } from "./main-nav-documents";
 // import { NavSecondary } from "./nav-secondary";
 import { MainNavUser } from "./main-nav-user";
 import {
@@ -51,7 +47,7 @@ const data = {
     {
       title: "Programar Interacciones",
       url: "/main/schedule-posts",
-      icon: CalendarIcon,
+      icon: CalendarRange,
       isActive: true,
     },
     {
@@ -63,35 +59,6 @@ const data = {
       title: "Historial",
       url: "/main/history",
       icon: ClockIcon,
-    },
-  ],
-  // navSecondary: [
-  //   {
-  //     title: "Usuario",
-  //     url: "#",
-  //     icon: UserIcon,
-  //   },
-  //   {
-  //     title: "Cerrar Sesión",
-  //     url: "/login",
-  //     icon: LogOutIcon,
-  //   },
-  // ],
-  documents: [
-    {
-      name: "Guía de TikTok",
-      url: "#",
-      icon: TikTokIcon,
-    },
-    {
-      name: "Guía de Facebook",
-      url: "#",
-      icon: FacebookIcon,
-    },
-    {
-      name: "Conexión de Dispositivos",
-      url: "#",
-      icon: SmartphoneIcon,
     },
   ],
 };
@@ -135,7 +102,6 @@ export function MainSidebar({
       </SidebarHeader>
       <SidebarContent>
         <CollapsibleNavMain items={data.navMain} />
-        <MainNavDocuments items={data.documents} />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
