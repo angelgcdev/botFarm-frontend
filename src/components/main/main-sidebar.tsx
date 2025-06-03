@@ -23,7 +23,6 @@ import {
 import { CollapsibleNavMain } from "./main-collapsible-nav";
 import Link from "next/link";
 import { ModeToggle } from "../mode-toggle";
-import Cookies from "js-cookie";
 
 const data = {
   navMain: [
@@ -69,9 +68,9 @@ export function MainSidebar({
   const [email, setEmail] = useState("usuario@ejemplo.com");
 
   useEffect(() => {
-    const cookieEmail = Cookies.get("email");
-    if (cookieEmail) {
-      setEmail(cookieEmail);
+    const email = localStorage.getItem("email");
+    if (email) {
+      setEmail(email);
     }
   }, []);
 

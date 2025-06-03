@@ -100,6 +100,7 @@ export function ScheduleInteractionsForm() {
       return;
     }
 
+    console.log(res);
     setscheduledTiktokInteractions(res.data);
   };
 
@@ -144,7 +145,7 @@ export function ScheduleInteractionsForm() {
   };
 
   //Funcion para ejecutar interaccion
-  const handleExecuteScheduledTiktokInteraction = async (
+  const handleExecuteScheduledTiktokInteraction = (
     scheduledTiktokInteractionData: ScheduledTiktokInteraction
   ) => {
     //Filtrar dispositivos conectados
@@ -154,9 +155,19 @@ export function ScheduleInteractionsForm() {
     console.log("Dispositivos activos:", activeDevices);
     console.log("Datos de la interaccion", scheduledTiktokInteractionData);
 
+    // Verificar que los dispositivos activos tengan su informacion completada
+    const isCompleteInfoDevices = activeDevices.some(
+      (device) => device.complete_config === false
+    );
+
+    if (isCompleteInfoDevices) {
+      toast.warning("❗ Completar información adicional del dispositivo...");
+      return;
+    }
+
     if (activeDevices.length === 0) {
       toast.warning("🚨 No se encontraron dispositivos conectados.");
-      return false;
+      return;
     }
 
     console.log("enviando datos a socket io... ");
@@ -173,7 +184,7 @@ export function ScheduleInteractionsForm() {
       } iniciada correctamente`
     );
 
-    return true;
+    // return true;
   };
 
   //Funcion para editar interaccion

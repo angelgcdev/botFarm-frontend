@@ -19,9 +19,7 @@ import { toast } from "sonner";
 
 type Props = {
   scheduledTiktokInteractions: ScheduledTiktokInteraction[];
-  onExecuteInteraction: (
-    interaction: ScheduledTiktokInteraction
-  ) => Promise<boolean>;
+  onExecuteInteraction: (interaction: ScheduledTiktokInteraction) => void;
   onEditInteraction: (
     id: number,
     interactionEdited: TikTokInteractionForm
@@ -199,8 +197,8 @@ const ScheduledTiktokInteractions = ({
               variant="default"
               className="cursor-pointer"
               // className="cursor-pointer bg-[#007BFF] hover:bg-[#0056b3] text-white"
-              onClick={async () => {
-                await onExecuteInteraction(interaction);
+              onClick={() => {
+                onExecuteInteraction(interaction);
               }}
               disabled={anyExecuting || interaction.status === "EN_PROGRESO"}
             >
