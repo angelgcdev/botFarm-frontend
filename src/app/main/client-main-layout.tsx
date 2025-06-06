@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import SendUserIdOnLoad from "./ClientUserSender";
 import { SocketProvider } from "@/context/SocketContext";
+import { ActiveDevicesPanel } from "@/components/main/ActiveDevicesPanel";
 
 const ClientMainLayout = ({
   children,
@@ -39,6 +40,7 @@ const ClientMainLayout = ({
               </div>
             </SidebarInset>
           </SidebarProvider>
+          <ActiveDevicesPanel />
         </DevicesProvider>
       </SocketProvider>
     </>

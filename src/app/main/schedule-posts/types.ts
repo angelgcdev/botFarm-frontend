@@ -15,3 +15,8 @@ export interface ScheduledTiktokInteraction {
   views_count: number;
   status: InteractionStatus;
 }
+
+export type EstimatedTimeData = {
+  estimatedTime: string;
+  interactionId: number;
+};
