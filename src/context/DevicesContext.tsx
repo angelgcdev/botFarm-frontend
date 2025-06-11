@@ -43,10 +43,14 @@ const DevicesProvider = ({ children }: { children: React.ReactNode }) => {
     socket.on("device:connected:notification", fetchDevices);
     socket.on("device:disconnected:notification", fetchDevices);
 
+    // Actualizar la informacion de los dispositivos
+    socket.on("device:refresh", fetchDevices);
+
     // Limpieza al desmontar
     return () => {
       socket.off("device:connected:notification", fetchDevices);
       socket.off("device:disconnected:notification", fetchDevices);
+      socket.off("device:refresh", fetchDevices);
     };
   }, [socket]);
 

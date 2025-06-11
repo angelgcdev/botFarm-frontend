@@ -26,6 +26,7 @@ import { updateInfoDevice } from "@/app/main/devices/api";
 
 // 4. Imports relativos
 import { Input } from "../../ui/input";
+import { Loader2 } from "lucide-react";
 
 const items = [
   {
@@ -70,6 +71,7 @@ export function DeviceForm({
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    mode: "onChange",
     defaultValues: {
       email: initialData?.email || "",
       items: initialData?.items ?? [],
@@ -196,7 +198,23 @@ export function DeviceForm({
               </FormItem>
             )}
           />
-          <Button type="submit">Guardar</Button>
+          <Button
+            type="submit"
+            disabled={
+              !form.formState.isDirty || // No hay cambios
+              !form.formState.isValid || // No es válido aún
+              form.formState.isSubmitting // Ya se está enviando
+            }
+          >
+            {form.formState.isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              "Guardar"
+            )}
+          </Button>
         </form>
       </Form>
     </>
