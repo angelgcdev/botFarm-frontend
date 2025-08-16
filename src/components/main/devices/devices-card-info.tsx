@@ -90,7 +90,7 @@ export function DevicesCardInfo({ device }: { device: Device }) {
                 variant="outline"
                 className={
                   isActive
-                    ? "text-green-600 border-green-600"
+                    ? "text-emerald-600 border-emerald-600"
                     : "text-gray-400 border-gray-400"
                 }
               >

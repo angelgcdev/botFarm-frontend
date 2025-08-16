@@ -16,7 +16,8 @@ export interface ScheduledTiktokInteraction {
   status: InteractionStatus;
 }
 
-export type EstimatedTimeData = {
+export type ExecutionInfo = {
   estimatedTime: string;
   interactionId: number;
+  totalDevices: number;
 };

@@ -13,22 +13,23 @@ const SendUserIdOnLoad = () => {
         return;
       }
 
-      //Envia el usuario_id al servidor local
-      const res = await sendUserIdApi({ user_id });
+      try {
+        //Envia el usuario_id al servidor local
+        const res = await sendUserIdApi({ user_id });
 
-      //Verificar si el envio fue exitoso
-      if (!res.ok) {
-        console.error(
-          "Envio de datos al servidor local fallido: ",
-          res.message
-        );
+        //Verificar si el envio fue exitoso
+        if (!res.ok) {
+          console.warn("Fallo al enviar datos al servidor local:", res.message);
+        } else {
+          const restData = res.data;
+          console.log(
+            "Se enviaron datos al servidor local exitosamente:",
+            restData
+          );
+        }
+      } catch (error) {
+        console.warn("No se pudo conectar con el servidor local:", error);
       }
-
-      const restData = res.data;
-      console.log(
-        "Se enviaron datos al servidor local exitosamente:",
-        restData
-      );
     };
     sendUserId();
   }, []);

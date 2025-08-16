@@ -173,10 +173,7 @@ export function ScheduleInteractionsForm() {
     console.log("enviando datos a socket io... ");
 
     // Enviar los datos al servidor
-    socket.emit("schedule:tiktok:start", {
-      scheduledTiktokInteractionData,
-      activeDevices,
-    });
+    socket.emit("schedule:tiktok:start", scheduledTiktokInteractionData);
 
     toast.success(
       `Interacción de ${

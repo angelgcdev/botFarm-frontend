@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  EstimatedTimeData,
+  ExecutionInfo,
   ScheduledTiktokInteraction,
 } from "@/app/main/schedule-posts/types";
 import { TikTokScriptLoader } from "@/app/main/schedule-posts/TiktokScriptLoader";
@@ -25,6 +25,8 @@ import {
   Bookmark,
   Eye,
   MessageCircle,
+  Monitor,
+  Circle,
 } from "lucide-react";
 import { EditModal, TikTokInteractionForm } from "./EditModal";
 import { useContext, useEffect, useState } from "react";
@@ -49,12 +51,16 @@ const ScheduledTiktokInteractions = ({
   onDeleteInteraction,
   onCancelInteraction,
 }: Props) => {
+  const [completedDevices, setCompletedDevices] = useState<number>(0);
+  const [totalDevices, setTotalDevices] = useState<number>(0);
+
   //
   const { socket } = useContext(SocketContext);
 
   const [cancelingIds, setCancelingIds] = useState<number[]>([]);
-  const [estimatedTimeData, setEstimatedTimeData] =
-    useState<EstimatedTimeData | null>(null);
+  const [executionInfo, setExecutionInfo] = useState<ExecutionInfo | null>(
+    null
+  );
 
   //Liberar el bloqueo de las interacciones
   useEffect(() => {
@@ -67,13 +73,22 @@ const ScheduledTiktokInteractions = ({
       setCancelingIds([]);
     });
 
-    socket.on("schedule:tiktok:estimated_time_all", (data) => {
-      setEstimatedTimeData(data);
+    socket.on("schedule:tiktok:execution_info", (data) => {
+      setExecutionInfo(data);
     });
+
+    socket.on(
+      "schedule:tiktok:progress",
+      ({ completedDevices, totalDevices }) => {
+        setCompletedDevices(Number(completedDevices));
+        setTotalDevices(Number(totalDevices));
+      }
+    );
 
     return () => {
       socket.off("interaction:canceled");
-      socket.off("schedule:tiktok:estimated_time_all");
+      socket.off("schedule:tiktok:execution_info");
+      socket.off("schedule:tiktok:progress");
     };
   }, [socket]);
 
@@ -93,6 +108,58 @@ const ScheduledTiktokInteractions = ({
     (interaction) => interaction.status === "EN_PROGRESO"
   );
 
+  // Funcion para actulizar el estado en el Badge
+  const renderStatusBadge = (status: string) => {
+    switch (status) {
+      case "PENDIENTE":
+        return (
+          <Badge
+            className="text-sm px-3 py-1.5 font-medium bg-amber-500/15 text-amber-400 border-amber-500/30"
+            variant="outline"
+          >
+            Pendiente
+          </Badge>
+        );
+      case "EN_PROGRESO":
+        return (
+          <Badge
+            variant="secondary"
+            className="text-sm px-3 py-1.5 font-medium bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+          >
+            <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />
+            Ejecutando...
+          </Badge>
+        );
+      case "COMPLETADA":
+        return (
+          <Badge
+            className="text-sm px-3 py-1.5 font-medium bg-blue-500/15 text-blue-400 border-blue-500/30"
+            variant="outline"
+          >
+            Completado
+          </Badge>
+        );
+      case "CANCELADO":
+        return (
+          <Badge
+            className="text-sm px-3 py-1.5 font-medium bg-red-500/15 text-red-400 border-red-500/30"
+            variant="outline"
+          >
+            Cancelado
+          </Badge>
+        );
+      default:
+        return (
+          <Badge
+            className="text-sm px-3 py-1.5 font-medium"
+            variant="destructive"
+          >
+            Fallida
+          </Badge>
+        );
+    }
+  };
+
   return (
     <div
       className="max-w-[1200px] mx-auto mt-4"
@@ -110,47 +177,17 @@ const ScheduledTiktokInteractions = ({
             <CardTitle className="text-lg font-semibold ">
               Interacción #{index + 1}
             </CardTitle>
-            {interaction.status === "PENDIENTE" ? (
-              <Badge
-                className="bg-yellow-100 text-yellow-800 border border-yellow-300"
-                variant="outline"
-              >
-                Pendiente
-              </Badge>
-            ) : interaction.status === "EN_PROGRESO" ? (
-              <Badge
-                className="bg-blue-100 text-blue-800 border border-blue-300"
-                variant="outline"
-              >
-                En proceso
-              </Badge>
-            ) : interaction.status === "COMPLETADA" ? (
-              <Badge
-                className="bg-green-100 text-green-800 border border-green-300"
-                variant="outline"
-              >
-                Completado
-              </Badge>
-            ) : interaction.status === "CANCELADO" ? (
-              <Badge
-                className="bg-red-50 text-red-600 border-red-200"
-                variant="outline"
-              >
-                Cancelado
-              </Badge>
-            ) : (
-              <Badge variant="destructive">Fallida</Badge>
-            )}
+            {renderStatusBadge(interaction.status)}
           </CardHeader>
           <CardContent>
-            <div className="relative">
+            <div className="relative mb-4">
               <blockquote
                 className="tiktok-embed"
                 cite={interaction.video_url}
                 data-video-id={getDataVideoId(interaction.video_url)}
                 style={{
                   width: "100%",
-                  height: "750px",
+                  height: "575px",
                   borderRadius: "7px",
                   overflow: "hidden",
                   margin: "initial",
@@ -189,69 +226,127 @@ const ScheduledTiktokInteractions = ({
               </div>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="font-bold text-sm flex items-center">
-                <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                Acciones configuradas:
-              </h4>
-
-              <div className=" p-3 rounded-lg space-y-2 border border-blue-100">
-                <div className="flex items-center space-x-4 text-sm">
-                  {interaction.liked ? (
-                    <div className="flex items-center space-x-1">
-                      <Heart
-                        className="w-4 h-4 text-red-500"
-                        fill="currentColor"
-                      />
-                      <span>Me Gusta</span>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-
-                  {interaction.saved ? (
-                    <div className="flex items-center space-x-1">
-                      <Bookmark
-                        className="w-4 h-4 text-yellow-600"
-                        fill="currentColor"
-                      />
-                      <span>Guardar video</span>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center space-x-2 ">
-                    <MessageCircle className="w-4 h-4 text-blue-600" />
-                    <span className="font-medium">Comentario:</span>
-                  </div>
-                </div>
-                <div className="text-xs text-gray-600 bg-white p-2 rounded border italic">
-                  {interaction.comment}
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center space-x-2">
-                    <Eye className="w-4 h-4 text-purple-600" />
-                    <span className="font-medium">Cantidad de vistas:</span>
-                  </div>
-                  <span className="font-bold text-purple-600">
-                    {interaction.views_count}
-                  </span>
-                </div>
+            <div className="mb-4 text-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                <h4 className="font-medium">Acciones configuradas:</h4>
               </div>
+
+              <div className="grid [grid-template-columns:repeat(auto-fit,minmax(min(100%,80px),1fr))] gap-2 text-center text-sm font-light mb-4">
+                {interaction.liked ? (
+                  <div className="flex items-center gap-1 justify-center bg-gray-800/60 px-2.5 py-1.5 rounded-md border border-gray-700/50">
+                    <Heart
+                      className="w-4 h-4 text-red-500"
+                      fill="currentColor"
+                    />
+                    <span>Me Gusta</span>
+                  </div>
+                ) : (
+                  ""
+                )}
+
+                {interaction.saved ? (
+                  <div className=" flex items-center gap-1 justify-center bg-gray-800/60 px-2.5 py-1.5 rounded-md border border-gray-700/50">
+                    <Bookmark
+                      className="w-4 h-4 text-yellow-600"
+                      fill="currentColor"
+                    />
+                    <span>Guardar</span>
+                  </div>
+                ) : (
+                  ""
+                )}
+
+                {interaction.views_count !== 0 ? (
+                  <div className=" flex items-center gap-1 justify-center bg-gray-800/60 px-2.5 py-1.5 rounded-md border border-gray-700/50">
+                    <div className="">
+                      <Eye className="w-4 h-4 text-purple-600" />
+                      {/* <span className="font-medium">Vistas:</span> */}
+                    </div>
+                    <span className="font-bold text-purple-600">
+                      {interaction.views_count}
+                    </span>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </div>
+
+              {interaction.comment.trim() !== "" ? (
+                <div className="flex-col">
+                  <div className="flex gap-2">
+                    <MessageCircle className="w-5 h-5 text-blue-600" />
+                    <span className="text-sm">Comentario</span>
+                  </div>
+                  <div className="flex items-center justify-evenly gap-1.5 text-sm text-gray-400 bg-gray-800/60 p-2 rounded border">
+                    <div className="overflow-auto">{interaction.comment}</div>
+                  </div>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
 
+            {/* Contador de dispositivo */}
+            {interaction.status === "EN_PROGRESO" ? (
+              <div className="flex-col">
+                <div className="flex justify-between items-center p-3">
+                  <div className="flex items-center gap-2">
+                    <Monitor className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      Dispositivos
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold text-foreground">
+                      {completedDevices}/{totalDevices}
+                    </span>
+
+                    <div className="relative ">
+                      <Circle
+                        className="w-3 h-3 text-emerald-500 fill-current"
+                        strokeWidth={0}
+                      />
+                      <div className="absolute inset-0 w-3 h-3 bg-emerald-500 rounded-full animate-ping opacity-75"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Progreso</span>
+                    <span>
+                      {totalDevices > 0
+                        ? Math.round((completedDevices / totalDevices) * 100)
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+                      style={{
+                        width:
+                          totalDevices > 0
+                            ? `${(completedDevices / totalDevices) * 100}%`
+                            : "0%",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
             <div className="mt-4 pt-2">
               <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 bg-blue-50 py-2 px-3 rounded-lg">
                 <Clock className="w-4 h-4 text-blue-600" />
                 <span>
                   Tiempo estimado:{" "}
                   <strong>
-                    {estimatedTimeData?.interactionId === interaction.id
-                      ? estimatedTimeData?.estimatedTime
+                    {executionInfo?.interactionId === interaction.id
+                      ? executionInfo?.estimatedTime
                       : 0}
                   </strong>
                 </span>
@@ -261,14 +356,23 @@ const ScheduledTiktokInteractions = ({
           <CardFooter className="">
             <div className="space-y-3 flex-1">
               <Button
-                className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-medium" // className="cursor-pointer bg-[#007BFF] hover:bg-[#0056b3] text-white"
+                className="w-full bg-gradient-to-r from-emerald-400 to-emerald-600 hover:from-emerald-700 hover:to-emerald-700 text-white font-medium"
                 onClick={() => {
                   onExecuteInteraction(interaction);
                 }}
                 disabled={anyExecuting || interaction.status === "EN_PROGRESO"}
               >
-                <Play className="w-4 h-4 mr-2" />
-                Ejecutar Interacción
+                {interaction.status === "EN_PROGRESO" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-black" />
+                    Ejecutando Interacción
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-4 w-4" />
+                    Ejecutar Interacción
+                  </>
+                )}
               </Button>
 
               <div className="flex gap-2">

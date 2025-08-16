@@ -3,11 +3,7 @@ import { toast } from "sonner";
 import { Socket } from "socket.io-client";
 
 type ScheduleTiktokStatusData = {
-  activeDevice: {
-    udid?: string;
-    device_id?: number;
-    device_scheduled_tiktok_interaction_id?: number;
-  };
+  udid?: string;
   status?: string;
   error?: string;
 };
@@ -49,13 +45,10 @@ const socketDeviceConnectionNotification = (socket: Socket) => {
   const handleScheduleTiktokStatusNotification = (
     data: ScheduleTiktokStatusData
   ) => {
-    toast.info(
-      `Interacción en dispositivo ${data.activeDevice?.udid} : ${data.status}`,
-      {
-        description: data.error,
-        duration: 8000,
-      }
-    );
+    toast.info(`Interacción en dispositivo ${data?.udid} : ${data.status}`, {
+      description: data.error,
+      duration: 8000,
+    });
   };
 
   socket.off("notification:frontend", handleNotification);

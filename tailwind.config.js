@@ -1,4 +1,5 @@
-const { fontFamily } = require("tailwindcss/defaultTheme");
+import defaultTheme from "tailwindcss/defaultTheme";
+import animate from "tailwindcss-animate";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -7,8 +8,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)", ...fontFamily.sans],
-        mono: ["var(--font-geist-mono)", ...fontFamily.mono],
+        sans: ["var(--font-geist-sans)", ...defaultTheme.sans],
+        mono: ["var(--font-geist-mono)", ...defaultTheme.mono],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -90,6 +91,7 @@ module.exports = {
     },
   },
   plugins: [
+    animate,
     // require("tailwindcss-animate"),
     // require("@tailwindcss/container-queries"),
   ],

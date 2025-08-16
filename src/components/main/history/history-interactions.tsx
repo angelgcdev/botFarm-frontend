@@ -76,6 +76,8 @@ export function HistoryInteractions() {
     fetchData();
   }, []);
 
+  console.log("Historial de tiktok:", tiktokHistoryData);
+
   return (
     <Card className="w-full">
       <CardHeader>
