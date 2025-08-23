@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { getTiktokHistory } from "@/app/main/history/api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { formatRelativeWithDateFns } from "@/lib/utils/formatRelativeWithDateFns";
 
 enum TiktokInteractionStatus {
   COMPLEATADA = "COMPLETADA",
@@ -117,11 +118,7 @@ export function HistoryInteractions() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {new Date(item.finished_at).toLocaleDateString("es-ES", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
+                  {formatRelativeWithDateFns(item.finished_at)}
                 </TableCell>
                 <TableCell>
                   <Button variant="link" className="h-auto p-0" asChild>

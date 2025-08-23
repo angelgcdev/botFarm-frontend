@@ -1,0 +1,167 @@
+"use client";
+
+import {
+  CreateUserFormInput,
+  EditUserFormProps,
+} from "@/app/admin/usuarios/types";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { updateInfoUser } from "@/app/admin/usuarios/api";
+
+//Esquema de validacion con zod
+const createUserSchema = z.object({
+  email: z
+    .string()
+    .email("Formato de correo no válido")
+    .nonempty("Correo es requerido"),
+  password: z
+    .string()
+    .min(6, "La contraseña debe tener al menos 6 caracteres")
+    .nonempty("Contraseña es requerida"),
+  role: z.enum(["ADMINISTRADOR", "PERSONAL"], {
+    errorMap: () => ({ message: "Debe seleccionar un rol válido" }),
+  }),
+});
+
+type CreateUserSchema = z.infer<typeof createUserSchema>;
+
+export function EditUserForm({
+  onUserEdited,
+  onCloseModal,
+  user,
+  className,
+  ...props
+}: EditUserFormProps) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateUserSchema>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      email: user.email,
+      password: user.password,
+      role: user.role,
+    },
+  }); //integrar zod con
+
+  //Funcion para enviar los datos al backend de NestJS
+  const onSubmit = handleSubmit(async (data: CreateUserFormInput) => {
+    try {
+      const infoUser = { ...user, ...data };
+      console.log("Infor User:", infoUser);
+
+      const res = await updateInfoUser(infoUser);
+
+      if (!res.ok) {
+        toast.error(res.message);
+        return;
+      }
+
+      const resData = res.data;
+
+      // Cerrar el modal
+      onCloseModal();
+
+      //Actualizar la informacion
+      onUserEdited();
+
+      toast.success(`Cuenta editada correctamente: ${resData.email}`);
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+  });
+
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <form onSubmit={onSubmit}>
+        <div className="grid gap-6">
+          <div className="grid gap-3">
+            <Label htmlFor="email">Correo Electrónico</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="correo@correo.com"
+              {...register("email")}
+            />
+            {errors.email && (
+              <span className="text-red-500 text-sm">
+                {errors.email.message}
+              </span>
+            )}
+          </div>
+
+          <div className="grid gap-3">
+            <div className="flex items-center">
+              <Label htmlFor="password">Contraseña</Label>
+            </div>
+            <Input
+              id="password"
+              type=""
+              placeholder="Ingresa una contraseña"
+              {...register("password")}
+            />
+            {errors.password && (
+              <span className="text-red-500 text-sm">
+                {errors.password.message}
+              </span>
+            )}
+          </div>
+
+          <div className="grid gap-3">
+            <div className="flex items-center">
+              <Label htmlFor="password">Rol de usuario</Label>
+            </div>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  disabled
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Selecciona un rol" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PERSONAL">PERSONAL</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.role && (
+              <span className="text-red-500 text-sm">
+                {errors.role.message}
+              </span>
+            )}
+          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" /> Espere por favor
+              </>
+            ) : (
+              "Guardar cambios"
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

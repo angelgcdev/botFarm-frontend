@@ -9,16 +9,13 @@ import { Toaster } from "sonner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import SendUserIdOnLoad from "./ClientUserSender";
 import { SocketProvider } from "@/context/SocketContext";
-import { ActiveDevicesPanel } from "@/components/main/ActiveDevicesPanel";
+// import { ActiveDevicesPanel } from "@/components/main/ActiveDevicesPanel";
 
 const ClientMainLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  //Iniciando la conexion socket io client
-  // useSocket();
-
   return (
     <>
       <SocketProvider>
@@ -40,7 +37,7 @@ const ClientMainLayout = ({
               </div>
             </SidebarInset>
           </SidebarProvider>
-          <ActiveDevicesPanel />
+          {/* <ActiveDevicesPanel /> */}
         </DevicesProvider>
       </SocketProvider>
     </>

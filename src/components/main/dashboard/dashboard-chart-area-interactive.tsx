@@ -1,13 +1,30 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import * as React from "react";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 // Datos de ejemplo para interacciones en TikTok y Facebook
 const chartData = [
@@ -41,7 +58,7 @@ const chartData = [
   { date: "2024-04-28", tiktok: 122, facebook: 180 },
   { date: "2024-04-29", tiktok: 315, facebook: 240 },
   { date: "2024-04-30", tiktok: 454, facebook: 380 },
-]
+];
 
 const chartConfig = {
   interactions: {
@@ -55,38 +72,40 @@ const chartConfig = {
     label: "Facebook",
     color: "hsl(214, 89%, 52%)", // Azul para Facebook
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function ChartAreaInteractive() {
-  const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("30d")
+  const isMobile = useIsMobile();
+  const [timeRange, setTimeRange] = React.useState("30d");
 
   React.useEffect(() => {
     if (isMobile) {
-      setTimeRange("7d")
+      setTimeRange("7d");
     }
-  }, [isMobile])
+  }, [isMobile]);
 
   const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2024-04-30")
-    let daysToSubtract = 90
+    const date = new Date(item.date);
+    const referenceDate = new Date("2024-04-30");
+    let daysToSubtract = 90;
     if (timeRange === "30d") {
-      daysToSubtract = 30
+      daysToSubtract = 30;
     } else if (timeRange === "7d") {
-      daysToSubtract = 7
+      daysToSubtract = 7;
     }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+    return date >= startDate;
+  });
 
   return (
     <Card className="@container/card">
       <CardHeader className="relative">
         <CardTitle>Interacciones Programadas en el Último Mes</CardTitle>
         <CardDescription>
-          <span className="@[540px]/card:block hidden">Comparativa entre TikTok y Facebook</span>
+          <span className="@[540px]/card:block hidden">
+            Comparativa entre TikTok y Facebook
+          </span>
           <span className="@[540px]/card:hidden">TikTok vs Facebook</span>
         </CardDescription>
         <div className="absolute right-4 top-4">
@@ -108,7 +127,10 @@ export function ChartAreaInteractive() {
             </ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="@[767px]/card:hidden flex w-40" aria-label="Select a value">
+            <SelectTrigger
+              className="@[767px]/card:hidden flex w-40"
+              aria-label="Select a value"
+            >
               <SelectValue placeholder="Últimos 30 días" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
@@ -126,16 +148,35 @@ export function ChartAreaInteractive() {
         </div>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[250px] w-full"
+        >
           <AreaChart data={filteredData}>
             <defs>
               <linearGradient id="fillTikTok" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="rgba(0, 0, 0, 0.8)" stopOpacity={1.0} />
-                <stop offset="95%" stopColor="rgba(0, 0, 0, 0.1)" stopOpacity={0.1} />
+                <stop
+                  offset="5%"
+                  stopColor="rgba(0, 0, 0, 0.8)"
+                  stopOpacity={1.0}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="rgba(0, 0, 0, 0.1)"
+                  stopOpacity={0.1}
+                />
               </linearGradient>
               <linearGradient id="fillFacebook" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="rgba(24, 119, 242, 0.8)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="rgba(24, 119, 242, 0.1)" stopOpacity={0.1} />
+                <stop
+                  offset="5%"
+                  stopColor="rgba(24, 119, 242, 0.8)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="rgba(24, 119, 242, 0.1)"
+                  stopOpacity={0.1}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />
@@ -146,11 +187,11 @@ export function ChartAreaInteractive() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(value);
                 return date.toLocaleDateString("es-ES", {
                   month: "short",
                   day: "numeric",
-                })
+                });
               }}
             />
             <ChartTooltip
@@ -161,18 +202,29 @@ export function ChartAreaInteractive() {
                     return new Date(value).toLocaleDateString("es-ES", {
                       month: "short",
                       day: "numeric",
-                    })
+                    });
                   }}
                   indicator="dot"
                 />
               }
             />
-            <Area dataKey="facebook" type="natural" fill="url(#fillFacebook)" stroke="hsl(214, 89%, 52%)" stackId="a" />
-            <Area dataKey="tiktok" type="natural" fill="url(#fillTikTok)" stroke="hsl(0, 0%, 0%)" stackId="a" />
+            <Area
+              dataKey="facebook"
+              type="natural"
+              fill="url(#fillFacebook)"
+              stroke="hsl(214, 89%, 52%)"
+              stackId="a"
+            />
+            <Area
+              dataKey="tiktok"
+              type="natural"
+              fill="url(#fillTikTok)"
+              stroke="hsl(0, 0%, 0%)"
+              stackId="a"
+            />
           </AreaChart>
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }
-

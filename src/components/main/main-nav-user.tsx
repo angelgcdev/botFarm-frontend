@@ -53,10 +53,11 @@ export function MainNavUser({
         disconnectSocket();
       }
 
-      // 3. Eliminar cookies
+      // 3. Eliminar datos de localStorage
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
       localStorage.removeItem("email");
+      localStorage.removeItem("role");
 
       // 4. Redirigir al login
       router.push("/login");

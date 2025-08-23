@@ -175,7 +175,7 @@ const ScheduledTiktokInteractions = ({
         <Card key={interaction.id}>
           <CardHeader className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold ">
-              Interacción #{index + 1}
+              Interacción #{interaction.id}
             </CardTitle>
             {renderStatusBadge(interaction.status)}
           </CardHeader>

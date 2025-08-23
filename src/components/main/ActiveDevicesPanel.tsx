@@ -15,7 +15,7 @@ const ActiveDevicesPanel = () => {
     typeof window !== "undefined" ? localStorage.getItem("userId") : "--";
 
   return (
-    <div className="fixed top-6 right-6 z-50 animate-fade-in">
+    <div className=" animate-fade-in">
       <div className="bg-panel/95 backdrop-blur-md rounded-xl border border-panel-border shadow-lg p-5 min-w-[200px] hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
         {/* Estado principal */}
         <div className="flex items-center justify-between mb-4">

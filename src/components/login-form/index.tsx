@@ -55,6 +55,7 @@ export function LoginForm({
       localStorage.setItem("token", resData.accessToken);
       localStorage.setItem("userId", resData.user.userId);
       localStorage.setItem("email", resData.user.email);
+      localStorage.setItem("role", resData.user.role);
 
       //Redirige al dashboard
       // router.push("/main/dashboard");
