@@ -17,11 +17,21 @@ const DevicesPage = () => {
   console.log(devices);
 
   return (
-    <div className="grid  grid-cols-[repeat(auto-fill,_minmax(350px,_1fr))] gap-4 p-6 justify-items-center">
-      {devices.map((device, index) => (
-        <DevicesCardInfo key={index} device={device} />
-      ))}
-    </div>
+    <>
+      {devices.length === 0 ? (
+        <div>
+          <p className="text-center text-muted-foreground">
+            No hay dispositivos registrados todavia
+          </p>
+        </div>
+      ) : (
+        <div className="grid  grid-cols-[repeat(auto-fill,_minmax(350px,_1fr))] gap-4 p-6 justify-items-center">
+          {devices.map((device, index) => (
+            <DevicesCardInfo key={index} device={device} />
+          ))}
+        </div>
+      )}
+    </>
   );
 };
 

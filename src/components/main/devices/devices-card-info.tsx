@@ -27,9 +27,9 @@ import {
 
 // 4. Imports relativos
 import Image from "next/image";
-import { DevicesModalInfo } from "./devices-modal-info";
 import { SocketContext } from "@/context/SocketContext";
 import { toast } from "sonner";
+import { DeviceAccountsModal } from "./device-accounts-modal";
 
 export function DevicesCardInfo({ device }: { device: Device }) {
   const { socket } = useContext(SocketContext);
@@ -139,18 +139,11 @@ export function DevicesCardInfo({ device }: { device: Device }) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <DevicesModalInfo
-          infoCompletada={infoCompletada}
-          deviceId={device.id}
-          onComplete={() => {
-            setInfoCompletada(true);
-            router.refresh();
-          }}
-        >
-          <Button className={`w-full ${infoCompletada ? "" : "bg-yellow-200"}`}>
-            {infoCompletada ? "Modificar información" : "Completar información"}
+        <DeviceAccountsModal deviceId={device.id} deviceName={device.brand}>
+          <Button className="w-full bg-gray-700 hover:bg-gray-600">
+            Ver información
           </Button>
-        </DevicesModalInfo>
+        </DeviceAccountsModal>
       </CardFooter>
     </Card>
   );
