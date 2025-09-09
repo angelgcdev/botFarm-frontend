@@ -18,8 +18,8 @@ import {
   getGeneratedViews,
   getTotalTiktokInteractions,
 } from "@/app/main/dashboard/api";
-import { useContext, useEffect, useState } from "react";
-import { DevicesContext } from "@/context/DevicesContext";
+import { useEffect, useState } from "react";
+import { useDevices } from "@/context/DevicesContext";
 
 export function SectionCards() {
   //Estado para el total de interacciones realizadas
@@ -36,7 +36,8 @@ export function SectionCards() {
   const [generatedComments, setGeneratedComments] = useState(0);
 
   //Traer los dispositivos
-  const devices = useContext(DevicesContext);
+  const { devices } = useDevices();
+
   // Filtrar dispositivos activos
   const activeDevices = devices.filter((device) => device.status === "ACTIVO");
 

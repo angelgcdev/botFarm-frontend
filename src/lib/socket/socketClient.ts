@@ -23,7 +23,11 @@ export function iniciarSocketClient(user_id: number): Socket | null {
   const backendUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
 
-  socket = io(backendUrl);
+  socket = io(backendUrl, {
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 2000,
+  });
 
   socket.on("connect", () => {
     console.log("🔗 Conectado al servidor Socket.IO");

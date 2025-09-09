@@ -11,10 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ExecutionInfo,
-  ScheduledTiktokInteraction,
-  TiktokInteraction,
+  FacebookInteraction,
+  FacebookInteractionForm,
 } from "@/app/main/schedule-posts/types";
-import { TikTokScriptLoader } from "@/app/main/schedule-posts/TiktokScriptLoader";
 import {
   Trash2,
   SquarePen,
@@ -23,32 +22,30 @@ import {
   Clock,
   Play,
   Heart,
-  Bookmark,
-  Eye,
   MessageCircle,
   Monitor,
   Circle,
   Forward,
 } from "lucide-react";
-import { EditModal } from "./EditModal";
 import { useContext, useEffect, useState } from "react";
 import { SocketContext } from "@/context/SocketContext";
 import { toast } from "sonner";
 import { useDevices } from "@/context/DevicesContext";
 import {
-  deleteInteractionTiktokData,
-  editInteractionTiktokData,
+  deleteInteractionFacebookData,
+  editInteractionFacebookData,
 } from "@/app/main/schedule-posts/api";
-import { TikTokIcon } from "@/components/icons/tiktok-icon";
+import { EditFacebookModal } from "./EditFacebookModal";
+import { FacebookIcon } from "@/components/icons/facebook-icon";
 
 type Props = {
   loadData: () => void;
-  scheduledTiktokInteractions: TiktokInteraction[];
+  scheduledFacebookInteractions: FacebookInteraction[];
 };
 
-const ScheduledTiktokInteractions = ({
+const ScheduledFacebookInteractions = ({
   loadData,
-  scheduledTiktokInteractions,
+  scheduledFacebookInteractions: scheduledFacebookInteractions,
 }: Props) => {
   // Estados
   const [completedDevices, setCompletedDevices] = useState<number>(0);
@@ -97,18 +94,17 @@ const ScheduledTiktokInteractions = ({
   }
 
   //
-  if (scheduledTiktokInteractions.length === 0) {
+  if (scheduledFacebookInteractions.length === 0) {
     return null;
   }
 
-  const getDataVideoId = (videoUrl: string) => {
-    const match = videoUrl.match(/\/(video|photo)\/([^\/]+)/);
-    const videoId = match ? match[2] : null;
-    return videoId;
-  };
+  const getFacebookIframeSrc = (postUrl: string) =>
+    `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(
+      postUrl
+    )}&show_text=true&width=500`;
 
   //En el frontend, deshabilita todos los botones si cualquier interacción está en progreso:
-  const anyExecuting = scheduledTiktokInteractions.some(
+  const anyExecuting = scheduledFacebookInteractions.some(
     (interaction) => interaction.status === "EN_PROGRESO"
   );
 
@@ -165,15 +161,15 @@ const ScheduledTiktokInteractions = ({
   };
 
   //Funcion para ejecutar interaccion
-  const handleExecuteScheduledTiktokInteraction = (
-    scheduledTiktokInteractionData: ScheduledTiktokInteraction
+  const handleExecuteScheduledFacebookInteraction = (
+    scheduledFacebookInteractionData: FacebookInteraction
   ) => {
     //Filtrar dispositivos conectados
     const activeDevices = devices.filter(
       (device) => device.status === "ACTIVO"
     );
     console.log("Dispositivos activos:", activeDevices);
-    console.log("Datos de la interaccion", scheduledTiktokInteractionData);
+    console.log("Datos de la interaccion", scheduledFacebookInteractionData);
 
     // Verificar que los dispositivos activos tengan su informacion completada
     const isCompleteInfoDevices = activeDevices.some(
@@ -193,7 +189,10 @@ const ScheduledTiktokInteractions = ({
     console.log("enviando datos a socket io... ");
 
     // Enviar los datos al servidor
-    socket.emit("schedule:tiktok:start", scheduledTiktokInteractionData);
+    socket.emit("schedule:facebook:start", scheduledFacebookInteractionData);
+
+    //Actualizar datos del servidor
+    loadData();
 
     toast.success(`Interacción de iniciada correctamente`);
 
@@ -201,11 +200,11 @@ const ScheduledTiktokInteractions = ({
   };
 
   //Funcion para editar interaccion
-  const handleEditScheduledTiktokInteraction = async (
+  const handleEditScheduledFacebookInteraction = async (
     id: number,
-    interactionEdited: ScheduledTiktokInteraction
+    interactionEdited: FacebookInteractionForm
   ) => {
-    const res = await editInteractionTiktokData(id, interactionEdited);
+    const res = await editInteractionFacebookData(id, interactionEdited);
 
     console.log(res);
 
@@ -215,14 +214,14 @@ const ScheduledTiktokInteractions = ({
     }
 
     //Actualizar datos del servidor
-    await loadData();
+    loadData();
 
     toast.success("Editado correctamente");
   };
 
   //Funcion para eliminar interaccion
-  const handleDeleteScheduledTiktokInteraction = async (id: number) => {
-    const res = await deleteInteractionTiktokData(id);
+  const handleDeleteScheduledFacebookInteraction = async (id: number) => {
+    const res = await deleteInteractionFacebookData(id);
 
     if (!res.ok) {
       toast.error(res.message);
@@ -236,10 +235,10 @@ const ScheduledTiktokInteractions = ({
   };
 
   //Funcion para cancelar la interaccion
-  const handleCancelScheduledTiktokInteraction = async (
+  const handleCancelScheduledFacebookInteraction = async (
     interaction_id: number
   ) => {
-    socket.emit("cancel:tiktok:interaction", interaction_id);
+    socket.emit("cancel:facebook:interaction", interaction_id);
   };
 
   return (
@@ -252,37 +251,32 @@ const ScheduledTiktokInteractions = ({
         justifyContent: "center",
       }}
     >
-      <TikTokScriptLoader reloadTrigger={scheduledTiktokInteractions} />
-      {scheduledTiktokInteractions.map((interaction) => (
-        <Card key={interaction.updated_at}>
-          <CardHeader className="flex items-center justify-between">
+      {scheduledFacebookInteractions.map((interaction) => (
+        <Card
+          key={interaction.updated_at}
+          className=" border-4 border-[#1877F2]/40"
+        >
+          <CardHeader className="flex items-center justify-between ">
             <CardTitle className="text-lg font-semibold ">
               <div className="flex gap-2 items-center">
                 Interacción
-                <TikTokIcon />
+                <FacebookIcon className="text-[#1877F2]" />
               </div>
             </CardTitle>
             {renderStatusBadge(interaction.status)}
           </CardHeader>
           <CardContent>
             <div className="relative mb-4">
-              <blockquote
-                key={interaction.video_url} // 👈 esto fuerza a React a regenerar el nodo
-                className="tiktok-embed"
-                cite={interaction.video_url}
-                data-video-id={getDataVideoId(interaction.video_url)}
-                style={{
-                  width: "100%",
-                  height: "575px",
-                  borderRadius: "7px",
-                  overflow: "hidden",
-                  margin: "initial",
-                }}
-                data-embed-type="video"
-              >
-                <section>Loading...</section>
-              </blockquote>
-
+              <iframe
+                src={getFacebookIframeSrc(interaction.post_url)}
+                width="100%"
+                height="600px"
+                style={{ border: "none", overflow: "hidden" }}
+                scrolling="no"
+                frameBorder="0"
+                allowFullScreen={true}
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              ></iframe>
               <div
                 className={`absolute inset-0 flex flex-col items-center justify-center z-10 rounded-md
         bg-black/70  transition-opacity duration-200 
@@ -331,38 +325,14 @@ const ScheduledTiktokInteractions = ({
                   ""
                 )}
 
-                {interaction.saved ? (
-                  <div className=" flex items-center gap-1 justify-center bg-gray-800/60 px-2.5 py-1.5 rounded-md border border-gray-700/50">
-                    <Bookmark
-                      className="w-4 h-4 text-yellow-600"
-                      fill="currentColor"
-                    />
-                    <span className="text-white font-normal">Guardar</span>
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                {interaction.shared_on_facebook ? (
-                  <div className=" flex items-center gap-1 justify-center bg-gray-800/60 px-2.5 py-1.5 rounded-md border border-gray-700/50">
-                    <Forward
-                      className="w-4 h-4 text-blue-600"
-                      fill="currentColor"
-                    />
-                    <span className="text-white font-normal">Compartir</span>
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                {interaction.views_count !== 0 ? (
+                {interaction.share_groups_count !== 0 ? (
                   <div className=" flex items-center gap-1 justify-center bg-gray-800/60 px-2.5 py-1.5 rounded-md border border-gray-700/50">
                     <div className="">
-                      <Eye className="w-4 h-4 text-purple-600" />
-                      {/* <span className="font-medium">Vistas:</span> */}
+                      <Forward className="w-4 h-4 text-blue-600" />
+                      {/* <span className="font-medium">Grupos:</span> */}
                     </div>
-                    <span className="font-bold text-purple-600">
-                      {interaction.views_count}
+                    <span className="font-bold ">
+                      {interaction.share_groups_count}
                     </span>
                   </div>
                 ) : (
@@ -456,7 +426,7 @@ const ScheduledTiktokInteractions = ({
               <Button
                 className="w-full bg-gradient-to-r from-emerald-400 to-emerald-600 hover:from-emerald-700 hover:to-emerald-700 text-white font-medium"
                 onClick={() => {
-                  handleExecuteScheduledTiktokInteraction(interaction);
+                  handleExecuteScheduledFacebookInteraction(interaction);
                 }}
                 disabled={anyExecuting || interaction.status === "EN_PROGRESO"}
               >
@@ -474,16 +444,16 @@ const ScheduledTiktokInteractions = ({
               </Button>
 
               <div className="flex gap-2">
-                <EditModal
+                <EditFacebookModal
                   interaction={interaction}
-                  onEditInteraction={handleEditScheduledTiktokInteraction}
+                  onEditInteraction={handleEditScheduledFacebookInteraction}
                   trigger={
                     <Button
                       variant="outline"
                       className="cursor-pointer flex-1 border-gray-300 hover:bg-gray-50"
                       size="sm"
                       disabled={
-                        anyExecuting && interaction.status !== "EN_PROGRESO"
+                        anyExecuting || interaction.status === "EN_PROGRESO"
                       }
                     >
                       <SquarePen className="w-4 h-4 mr-1" />
@@ -498,7 +468,7 @@ const ScheduledTiktokInteractions = ({
                   size="sm"
                   onClick={() => {
                     setCancelingIds((prev) => [...prev, interaction.id]);
-                    handleCancelScheduledTiktokInteraction(interaction.id);
+                    handleCancelScheduledFacebookInteraction(interaction.id);
                   }}
                   disabled={
                     interaction.status === "PENDIENTE" ||
@@ -515,10 +485,10 @@ const ScheduledTiktokInteractions = ({
                   className="cursor-pointer flex-1 border-red-300 text-red-700 hover:bg-red-50"
                   size="sm"
                   onClick={() =>
-                    handleDeleteScheduledTiktokInteraction(interaction.id)
+                    handleDeleteScheduledFacebookInteraction(interaction.id)
                   }
                   disabled={
-                    anyExecuting && interaction.status !== "EN_PROGRESO"
+                    anyExecuting || interaction.status === "EN_PROGRESO"
                   }
                 >
                   <Trash2 />
@@ -533,4 +503,4 @@ const ScheduledTiktokInteractions = ({
   );
 };
 
-export { ScheduledTiktokInteractions };
+export { ScheduledFacebookInteractions };

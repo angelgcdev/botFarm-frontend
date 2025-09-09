@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,24 +25,22 @@ import {
   deleteDeviceAccount,
   deleteSocialNetworkAccount,
   getAccountsAndSocialMedia,
+  updateCompleteConfig,
 } from "@/app/main/devices/api";
 import { toast } from "sonner";
 import {
   AccountsAndSocialMedia,
   DeviceAccountsModalProps,
-  SocialNetworkAccount,
 } from "@/app/main/devices/types";
 import { AddAccountForm } from "./AddAccountForm";
+import { useDevices } from "@/context/DevicesContext";
 
 export function DeviceAccountsModal({
   children,
   deviceId,
   deviceName,
 }: DeviceAccountsModalProps) {
-  // const [accountId, setAccountId] = useState<number | null>(null);
-  // const [showSocialAccountForm, setShowSocialAccountForm] = useState(false);
-  const [socialAccountToEdit, setSocialAccountToEdit] =
-    useState<SocialNetworkAccount | null>(null);
+  const { fetchDevices } = useDevices();
 
   const [showAccountForm, setShowAccountForm] = useState(false);
   const [accountToEdit, setAccountToEdit] = useState<{
@@ -58,14 +56,8 @@ export function DeviceAccountsModal({
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (open) {
-      fetchData();
-    }
-  }, [open, deviceId]);
-
   // Obtener los datos del servidor
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
 
     //Obtener cuenta google del dispositivo
@@ -76,12 +68,49 @@ export function DeviceAccountsModal({
       return;
     }
 
-    setAccounts(res.data);
+    const accountsData = res.data || [];
+    setAccounts(accountsData);
+
+    // Contar cuenta de redes sociales
+    const totalSocialAccounts = accountsData.reduce(
+      (acc, account) => acc + account.social_network_accounts.length,
+      0
+    );
+
+    if (totalSocialAccounts === 0) {
+      //update a la tabla devices -> complete_config
+      const res = await updateCompleteConfig({
+        id: deviceId,
+        complete_config: false,
+      });
+
+      if (!res.ok) {
+        toast.error(res.message);
+        return;
+      }
+    }
+
+    if (totalSocialAccounts === 1) {
+      //update a la tabla devices -> complete_config
+      const res = await updateCompleteConfig({
+        id: deviceId,
+        complete_config: true,
+      });
+
+      if (!res.ok) {
+        toast.error(res.message);
+        return;
+      }
+    }
 
     setLoading(false);
-  };
+  }, [deviceId]); // dependencias internar
 
-  console.log("google accounts:", accounts);
+  useEffect(() => {
+    if (open) {
+      fetchData();
+    }
+  }, [open, deviceId, fetchData]);
 
   const toggleAccountExpansion = (accountId: number) => {
     const newExpanded = new Set(expandedAccounts);
@@ -91,22 +120,6 @@ export function DeviceAccountsModal({
       newExpanded.add(accountId);
     }
     setExpandedAccounts(newExpanded);
-  };
-
-  const handleAddSocialAccount = () => {
-    // setAccountId(accountId);
-    // setShowSocialAccountForm(true);
-    setSocialAccountToEdit(null);
-  };
-
-  const handleEditSocialAccount = (socialAccount: SocialNetworkAccount) => {
-    setSocialAccountToEdit(socialAccount);
-    // setShowSocialAccountForm(true);
-  };
-
-  const handleSaveSocialAccount = () => {
-    // Ocultar el modal
-    setSocialAccountToEdit(null);
   };
 
   const handleDeleteSocialAccount = async (socialAccountId: number) => {
@@ -119,6 +132,9 @@ export function DeviceAccountsModal({
 
     // Actualizar datos del servidor
     await fetchData();
+
+    // Actualizar datos del contexto DevicesContext
+    fetchDevices();
 
     toast.success("Cuenta de red social eliminada correctamente");
   };
@@ -143,6 +159,9 @@ export function DeviceAccountsModal({
 
     // Actualizar datos del servidor
     await fetchData();
+
+    // Actualizar datos del contexto DevicesContext
+    fetchDevices();
 
     toast.success("Correo eliminado correctamente");
   };

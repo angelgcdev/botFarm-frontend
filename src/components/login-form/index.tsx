@@ -9,8 +9,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/app/login/api";
 // import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Toaster, toast } from "sonner";
+import { useState } from "react";
 interface IFormInput {
   email: string;
   password: string;
@@ -38,6 +39,8 @@ export function LoginForm({
     formState: { errors, isSubmitting },
   } = useForm<IFormInput>({ resolver: zodResolver(loginSchema) }); //integrar zod con React Hook Form
   // const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
 
   //Funcion para enviar los datos al backend de NestJS
   const onSubmit = handleSubmit(async (data: IFormInput) => {
@@ -96,26 +99,33 @@ export function LoginForm({
             )}
           </div>
           <div className="grid gap-3">
-            <div className="flex items-center">
-              <Label htmlFor="password">Contraseña</Label>
-              <a
-                href="#"
-                className="ml-auto text-sm underline-offset-4 hover:underline"
+            <Label htmlFor="password">Contraseña</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Ingresa tu contraseña"
+                {...register("password")}
+              />
+              {errors.password && (
+                <span className="text-red-500 text-sm">
+                  {errors.password.message}
+                </span>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowPassword(!showPassword)}
               >
-                Olvidaste tu contraseña?
-              </a>
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
             </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="********"
-              {...register("password")}
-            />
-            {errors.password && (
-              <span className="text-red-500 text-sm">
-                {errors.password.message}
-              </span>
-            )}
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? (

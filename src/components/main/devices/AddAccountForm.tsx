@@ -83,51 +83,51 @@ export const AddAccountForm = ({
 
   return (
     <Card className="border-dashed">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <form onSubmit={onSubmit}>
-            <div>
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="ejemplo@gmail.com"
-                {...register("email")}
-              />
-              {errors.email && (
-                <span className="text-red-500 text-sm">
-                  {errors.email.message}
-                </span>
-              )}
-            </div>
+      <CardContent>
+        <form onSubmit={onSubmit}>
+          <div className="mb-4">
+            <Label className="mb-2" htmlFor="email">
+              Correo Electrónico
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="ejemplo@gmail.com"
+              {...register("email")}
+            />
+            {errors.email && (
+              <span className="text-red-500 text-sm">
+                {errors.email.message}
+              </span>
+            )}
+          </div>
 
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                size="sm"
-                className="cursor-pointer"
-              >
-                {isSubmitting
-                  ? "Guardando..."
-                  : accountToEdit
-                  ? "Actualizar"
-                  : "Agregar"}
-              </Button>
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              size="sm"
+              className="cursor-pointer"
+            >
+              {isSubmitting
+                ? "Guardando..."
+                : accountToEdit
+                ? "Actualizar"
+                : "Agregar"}
+            </Button>
 
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowAddAccountForm(false);
-                }}
-                size="sm"
-                className="cursor-pointer"
-              >
-                Cancelar
-              </Button>
-            </div>
-          </form>
-        </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowAddAccountForm(false);
+              }}
+              size="sm"
+              className="cursor-pointer"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

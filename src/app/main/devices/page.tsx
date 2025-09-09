@@ -3,16 +3,15 @@
 // 1. Librerías de Node.js
 
 // 2. Librerías de terceros
-import { useContext } from "react";
 
 // 3. Librerías internas absolutas
 import { DevicesCardInfo } from "@/components/main/devices/devices-card-info";
-import { DevicesContext } from "@/context/DevicesContext";
+import { useDevices } from "@/context/DevicesContext";
 
 // 4. Imports relativos
 
 const DevicesPage = () => {
-  const devices = useContext(DevicesContext);
+  const { devices, fetchDevices } = useDevices();
 
   console.log(devices);
 
@@ -27,7 +26,11 @@ const DevicesPage = () => {
       ) : (
         <div className="grid  grid-cols-[repeat(auto-fill,_minmax(350px,_1fr))] gap-4 p-6 justify-items-center">
           {devices.map((device, index) => (
-            <DevicesCardInfo key={index} device={device} />
+            <DevicesCardInfo
+              key={index}
+              device={device}
+              fetchDevices={fetchDevices}
+            />
           ))}
         </div>
       )}

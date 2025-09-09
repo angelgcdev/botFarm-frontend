@@ -4,7 +4,6 @@
 
 // 2. Librerías de terceros
 import { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 // 3. Librerías internas absolutas
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Device, DeviceStatus } from "@/types/device";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -30,16 +28,12 @@ import Image from "next/image";
 import { SocketContext } from "@/context/SocketContext";
 import { toast } from "sonner";
 import { DeviceAccountsModal } from "./device-accounts-modal";
+import { DevicesCardInfoProps, DeviceStatus } from "@/app/main/devices/types";
 
-export function DevicesCardInfo({ device }: { device: Device }) {
+export function DevicesCardInfo({ device }: DevicesCardInfoProps) {
   const { socket } = useContext(SocketContext);
 
   const [status, setStatus] = useState<DeviceStatus>(device.status);
-
-  const [infoCompletada, setInfoCompletada] = useState<boolean>(
-    device.complete_config
-  );
-  const router = useRouter();
 
   useEffect(() => {
     if (!socket) {
@@ -140,8 +134,16 @@ export function DevicesCardInfo({ device }: { device: Device }) {
       </CardContent>
       <CardFooter className="flex justify-center">
         <DeviceAccountsModal deviceId={device.id} deviceName={device.brand}>
-          <Button className="w-full bg-gray-700 hover:bg-gray-600">
-            Ver información
+          <Button
+            className={`w-full ${
+              device.complete_config
+                ? ""
+                : "bg-yellow-500 hover:bg-yellow-600 text-black"
+            }`}
+          >
+            {device.complete_config
+              ? "Ver información"
+              : "Completar informacion"}
           </Button>
         </DeviceAccountsModal>
       </CardFooter>

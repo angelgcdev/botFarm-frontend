@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,10 +32,11 @@ import {
   getSocialMediaData,
 } from "@/app/main/devices/api";
 import {
+  SocialAccountFormModalProps,
   SocialMediaAccount,
   SocialNetwork,
-  SocialNetworkAccount,
 } from "@/app/main/devices/types";
+import { useDevices } from "@/context/DevicesContext";
 
 //Esquema de validación con zod
 const createSocialAccountSchema = z.object({
@@ -46,19 +47,14 @@ const createSocialAccountSchema = z.object({
 
 type CreateSocialAccountSchema = z.infer<typeof createSocialAccountSchema>;
 
-interface SocialAccountFormModalProps {
-  trigger: ReactNode;
-  fetchData: () => void;
-  accountId?: number;
-  socialAccountToEdit?: SocialNetworkAccount;
-}
-
 export function SocialAccountFormModal({
   fetchData,
   accountId,
   socialAccountToEdit,
   trigger,
 }: SocialAccountFormModalProps) {
+  const { fetchDevices } = useDevices();
+
   const [isOpen, setIsOpen] = useState(false);
 
   // Estado para guardar redes sociales obtenidas para el select
@@ -130,6 +126,9 @@ export function SocialAccountFormModal({
 
     // Actualizar datos del servidor
     await fetchData();
+
+    // Actualizar el contexto DevicesContext
+    fetchDevices();
 
     // cerrar el modal
     setIsOpen(false);

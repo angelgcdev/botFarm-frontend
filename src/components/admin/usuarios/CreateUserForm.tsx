@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Select,
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createUser } from "@/app/admin/usuarios/api";
+import { useState } from "react";
 
 //Esquema de validacion con zod
 const createUserSchema = z.object({
@@ -58,6 +59,8 @@ export function CreateUserForm({
       role: undefined,
     },
   }); //integrar zod con
+
+  const [showPassword, setShowPassword] = useState(false);
 
   //Funcion para enviar los datos al backend de NestJS
   const onSubmit = handleSubmit(async (data: CreateUserFormInput) => {
@@ -103,20 +106,34 @@ export function CreateUserForm({
           </div>
 
           <div className="grid gap-3">
-            <div className="flex items-center">
-              <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password">Contraseña</Label>
+
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Ingresa una contraseña"
+                {...register("password")}
+              />
+              {errors.password && (
+                <span className="text-red-500 text-sm">
+                  {errors.password.message}
+                </span>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
             </div>
-            <Input
-              id="password"
-              type=""
-              placeholder="Ingresa una contraseña"
-              {...register("password")}
-            />
-            {errors.password && (
-              <span className="text-red-500 text-sm">
-                {errors.password.message}
-              </span>
-            )}
           </div>
 
           <div className="grid gap-3">

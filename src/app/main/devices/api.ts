@@ -1,7 +1,52 @@
 // src/app/main/devices/devices.api.ts
-import { GoogleAccount, IFormInput, SocialMediaAccount } from "./types";
+import {
+  AccountsAndSocialMedia,
+  GoogleAccount,
+  IFormInput,
+  SocialMediaAccount,
+  UpdateCompleteConfig,
+} from "./types";
 
 const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+//Actualizar en la tabla devices -> complete_config
+const updateCompleteConfig = async ({
+  id,
+  complete_config,
+}: UpdateCompleteConfig) => {
+  try {
+    const TOKEN = localStorage.getItem("token");
+
+    const res = await fetch(
+      `${NEXT_PUBLIC_BACKEND_URL}/api/devices/complete-config/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({ complete_config: complete_config }),
+      }
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+
+    const data = await res.json();
+
+    return {
+      ok: true,
+      data,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Error inesperado",
+    };
+  }
+};
 
 //Actualizar la cuenta de red social
 const editSocialAccount = async (
@@ -237,56 +282,6 @@ const addDeviceAccount = async (googleAccount: GoogleAccount) => {
   }
 };
 
-// const completeInfoDevice = async (data: IFormInput) => {
-//   try {
-//     const TOKEN = localStorage.getItem("token");
-
-//     //Primera peticion: guardar cuenta_google y cuenta_red_social
-//     const resSave = await fetch(
-//       `${NEXT_PUBLIC_BACKEND_URL}/api/devices/complete-info`,
-//       {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${TOKEN}`,
-//         },
-//         body: JSON.stringify(data),
-//       }
-//     );
-
-//     if (!resSave.ok) {
-//       const error = await resSave.json();
-//       throw new Error(error.message);
-//     }
-
-//     const dataSave = await resSave.json();
-
-//     //Segunda peticion: marcar como completado
-//     const resUpdate = await fetch(
-//       `${NEXT_PUBLIC_BACKEND_URL}/api/devices/${data.dispositivo_id}/complete`,
-//       {
-//         method: "PATCH",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${TOKEN}`,
-//         },
-//       }
-//     );
-
-//     if (!resUpdate.ok) {
-//       const errorUpdate = await resUpdate.json();
-//       throw new Error(errorUpdate.message);
-//     }
-
-//     return { ok: true, data: dataSave };
-//   } catch (error) {
-//     return {
-//       ok: false,
-//       message: error instanceof Error ? error.message : "Error inesperado",
-//     };
-//   }
-// };
-
 const updateInfoDevice = async (dataDevice: IFormInput) => {
   try {
     const TOKEN = localStorage.getItem("token");
@@ -320,7 +315,13 @@ const updateInfoDevice = async (dataDevice: IFormInput) => {
   }
 };
 
-const getAccountsAndSocialMedia = async (deviceId: number) => {
+const getAccountsAndSocialMedia = async (
+  deviceId: number
+): Promise<{
+  ok: boolean;
+  data?: AccountsAndSocialMedia[];
+  message?: string;
+}> => {
   try {
     const TOKEN = localStorage.getItem("token");
 
@@ -352,7 +353,7 @@ const getAccountsAndSocialMedia = async (deviceId: number) => {
   }
 };
 
-//Obtener datos de la tabla device
+//Obtener datos de "device → google_accounts → social_network_accounts"
 const getAllDevices = async () => {
   try {
     const TOKEN = localStorage.getItem("token");
@@ -413,6 +414,7 @@ const updateAllStatus = async () => {
 };
 
 export {
+  updateCompleteConfig,
   editSocialAccount,
   deleteSocialNetworkAccount,
   addSocialMediaAccount,

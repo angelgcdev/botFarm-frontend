@@ -1,11 +1,10 @@
 "use client";
 
-import { DevicesContext } from "@/context/DevicesContext";
-import { useContext } from "react";
+import { useDevices } from "@/context/DevicesContext";
 import { Circle, Smartphone } from "lucide-react";
 
 const ActiveDevicesPanel = () => {
-  const devices = useContext(DevicesContext);
+  const { devices } = useDevices();
 
   //Filtrar dispositivos activos
   const activeDevices = devices.filter((device) => device.status === "ACTIVO");

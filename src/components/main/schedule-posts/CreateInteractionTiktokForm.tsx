@@ -1,51 +1,44 @@
 "use client";
 
-// 1. Librerías de Node.js
-
-// 2. Librerías de terceros
-import { z } from "zod";
+import React, { ReactNode, useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { TikTokIcon } from "@/components/icons/tiktok-icon";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-
-// 3. Librerías internas absolutas
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import z from "zod";
+import { Input } from "@/components/ui/input";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-// 4. Imports relativos
-import {
-  ScheduledTiktokInteractionEdit,
-  TikTokPreview,
-} from "@/app/main/schedule-posts/types";
-import Image from "next/image";
-import { fetchTikTokPreview } from "@/app/main/schedule-posts/api";
+  createInteractionTiktokData,
+  fetchTikTokPreview,
+} from "@/app/main/schedule-posts/api";
 import { toast } from "sonner";
-import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TikTokPreview } from "@/app/main/schedule-posts/types";
+import Image from "next/image";
 
-type Props = {
-  interaction: ScheduledTiktokInteractionEdit;
-  onEditInteraction: (id: number, data: TikTokInteractionForm) => void;
-  trigger: React.ReactNode;
-};
+export interface Props {
+  loadData: () => void;
+  trigger: ReactNode;
+}
 
 const tiktokInteractionSchema = z.object({
   video_url: z.string().url().min(1, "El enlace es requerido"),
@@ -61,22 +54,21 @@ const tiktokInteractionSchema = z.object({
 
 export type TikTokInteractionForm = z.infer<typeof tiktokInteractionSchema>;
 
-function EditModal({ interaction, onEditInteraction, trigger }: Props) {
-  // 1. Estados
+const CreateInteractionTiktokForm = ({ loadData, trigger }: Props) => {
+  // 1. Estado
+  const [isOpen, setIsOpen] = useState(false);
   const [preview, setPreview] = useState<null | TikTokPreview>(null);
-  const [open, setOpen] = useState(false);
 
   // 4. Librerias
-  //Use form
   const form = useForm<z.infer<typeof tiktokInteractionSchema>>({
     resolver: zodResolver(tiktokInteractionSchema),
     defaultValues: {
-      video_url: interaction.video_url,
-      views_count: interaction.views_count,
-      liked: interaction.liked,
-      saved: interaction.saved,
-      shared_on_facebook: interaction.saved,
-      comment: interaction.comment,
+      video_url: "",
+      views_count: 0,
+      liked: false,
+      saved: false,
+      shared_on_facebook: false,
+      comment: "",
     },
   });
 
@@ -105,28 +97,45 @@ function EditModal({ interaction, onEditInteraction, trigger }: Props) {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  const onSubmit = async (interactionEdited: TikTokInteractionForm) => {
-    onEditInteraction(interaction.id, interactionEdited);
-    setOpen(false); // Cierra el modal
+  const onSubmit = async (scheduledTiktokDataForm: TikTokInteractionForm) => {
+    console.log("Datos de la interaccion de tiktok:", scheduledTiktokDataForm);
+
+    const res = await createInteractionTiktokData(scheduledTiktokDataForm);
+
+    if (!res.ok) {
+      toast.error(res.message);
+    }
+
+    //Actualizar datos del servidor
+    await loadData();
+
+    toast.success("Creado correctamente");
+
+    //Cerrar el modal
+    setIsOpen(false);
+
+    form.reset();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <div onClick={() => setOpen(true)}>{trigger}</div>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Editar interacción #{interaction.id}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <TikTokIcon className="h-5 w-5" />
+            Potencia tu visibilidad en TikTok
+          </DialogTitle>
+          <DialogDescription>
+            Amplifica tu alcance automáticamente generando interacciones reales
+            en tus videos favoritos.
+          </DialogDescription>
         </DialogHeader>
 
         <Card className="w-full border rounded">
           <CardContent>
             <Form {...form}>
-              <form
-                className="space-y-8"
-                onSubmit={form.handleSubmit(onSubmit)}
-              >
+              <form className="space-y-8">
                 <FormField
                   control={form.control}
                   name="video_url"
@@ -140,6 +149,7 @@ function EditModal({ interaction, onEditInteraction, trigger }: Props) {
                           {...field}
                         />
                       </FormControl>
+                      {/* <FormDescription>Alguna descripcion</FormDescription> */}
                       <FormMessage />
                       {/* Mostramos la previsualización */}
                       {preview && (
@@ -165,67 +175,69 @@ function EditModal({ interaction, onEditInteraction, trigger }: Props) {
 
                 <p className="text-base">¿Qué acciones quieres realizar?</p>
 
-                <FormField
-                  control={form.control}
-                  name="liked"
-                  render={({ field }) => (
-                    <FormItem className="flex">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">Me gusta</FormLabel>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="flex gap-4 flex-wrap">
+                  <FormField
+                    control={form.control}
+                    name="liked"
+                    render={({ field }) => (
+                      <FormItem className="flex">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">Me gusta</FormLabel>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="saved"
-                  render={({ field }) => (
-                    <FormItem className="flex">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Guardar video
-                      </FormLabel>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="saved"
+                    render={({ field }) => (
+                      <FormItem className="flex">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Guardar video
+                        </FormLabel>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="shared_on_facebook"
-                  render={({ field }) => (
-                    <FormItem className="flex">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Compartir en un grupo de Facebook
-                      </FormLabel>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="shared_on_facebook"
+                    render={({ field }) => (
+                      <FormItem className="flex">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Compartir en un grupo de Facebook
+                        </FormLabel>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
                   name="comment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Comentario</FormLabel>
+                      <FormLabel>Escribe el comentario a publicar</FormLabel>
                       <FormControl>
                         <Textarea
                           id="tiktok-comment-text"
@@ -233,6 +245,7 @@ function EditModal({ interaction, onEditInteraction, trigger }: Props) {
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription>alguna descripcion</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -261,20 +274,26 @@ function EditModal({ interaction, onEditInteraction, trigger }: Props) {
                           }
                         />
                       </FormControl>
+                      <FormDescription>Alguna descripcion</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <DialogFooter>
-                  <Button type="submit">Guardar cambios</Button>
-                </DialogFooter>
               </form>
             </Form>
           </CardContent>
+          <CardFooter className="flex justify-end">
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              className="bg-black hover:bg-black/40 text-white"
+            >
+              Crear Interacción
+            </Button>
+          </CardFooter>
         </Card>
       </DialogContent>
     </Dialog>
   );
-}
+};
 
-export { EditModal };
+export default CreateInteractionTiktokForm;
