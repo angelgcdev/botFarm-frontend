@@ -99,7 +99,7 @@ export function ChartAreaInteractive() {
   });
 
   return (
-    <Card className="@container/card">
+    <Card className="">
       <CardHeader className="relative">
         <CardTitle>Interacciones Programadas en el Último Mes</CardTitle>
         <CardDescription>

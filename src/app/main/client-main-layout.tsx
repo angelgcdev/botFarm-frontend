@@ -7,7 +7,6 @@ import { DevicesProvider } from "@/context/DevicesContext";
 // import { useSocket } from "@/hooks/useSocket";
 import { Toaster } from "sonner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import SendUserIdOnLoad from "./ClientUserSender";
 import { SocketProvider } from "@/context/SocketContext";
 // import { ActiveDevicesPanel } from "@/components/main/ActiveDevicesPanel";
 
@@ -20,8 +19,6 @@ const ClientMainLayout = ({
     <>
       <SocketProvider>
         <DevicesProvider>
-          <SendUserIdOnLoad />
-
           <Toaster position="bottom-right" richColors closeButton />
           <SidebarProvider>
             <MainSidebar variant="inset" />

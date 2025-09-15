@@ -43,13 +43,17 @@ type Props = {
 };
 
 const facebookInteractionSchema = z.object({
-  post_url: z.string().url().min(1, "El enlace es requerido"),
+  post_url: z
+    .string()
+    .url("Por favor ingresa un enlace válido")
+    .min(1, "El enlace es requerido"),
   title_post: z.string().optional(),
   liked: z.boolean().optional(),
   comment: z.string().optional(),
   share_groups_count: z
     .number()
-    .min(0, "El número de grupos a compartir, no puede ser menor que 0.")
+    .min(0, "El número de grupos a compartir no puede ser negativo.")
+    .max(10, "No puedes compartir en más de 10 grupos.")
     .optional(),
 });
 
@@ -188,15 +192,16 @@ function EditFacebookModal({ interaction, onEditInteraction, trigger }: Props) {
                         <Input
                           id="share_groups_count"
                           type="number"
-                          placeholder="100"
+                          placeholder="Ingresa la cantidad de grupos"
                           value={field.value ?? ""}
                           onChange={(e) =>
                             field.onChange(
                               e.target.value === ""
                                 ? undefined
-                                : Number(e.target.value)
+                                : Math.min(Number(e.target.value), 10)
                             )
                           }
+                          max={10}
                         />
                       </FormControl>
                       <FormDescription>

@@ -1,4 +1,4 @@
-import { CreateUserFormInput, UserDataItem } from "./types";
+import { CreateUserFormInput } from "./types";
 
 const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const TOKEN = localStorage.getItem("token");
@@ -29,19 +29,16 @@ const deleteUser = async (id: number) => {
   }
 };
 
-const updateInfoUser = async (userEdited: UserDataItem) => {
+const updateInfoUser = async (userData: CreateUserFormInput, id: number) => {
   try {
-    const res = await fetch(
-      `${NEXT_PUBLIC_BACKEND_URL}/api/auth/${userEdited.id}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-        body: JSON.stringify(userEdited),
-      }
-    );
+    const res = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/api/auth/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify(userData),
+    });
 
     if (!res.ok) {
       const error = await res.json();

@@ -63,10 +63,9 @@ export function EditUserForm({
   //Funcion para enviar los datos al backend de NestJS
   const onSubmit = handleSubmit(async (data: CreateUserFormInput) => {
     try {
-      const infoUser = { ...user, ...data };
-      console.log("Infor User:", infoUser);
+      console.log("UserData:", data);
 
-      const res = await updateInfoUser(infoUser);
+      const res = await updateInfoUser(data, user.id);
 
       if (!res.ok) {
         toast.error(res.message);

@@ -258,8 +258,8 @@ const ScheduledTiktokInteractions = ({
           <CardHeader className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold ">
               <div className="flex gap-2 items-center">
-                Interacción
                 <TikTokIcon />
+                Interacción
               </div>
             </CardTitle>
             {renderStatusBadge(interaction.status)}

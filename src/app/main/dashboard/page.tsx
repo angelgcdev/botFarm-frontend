@@ -3,12 +3,14 @@ import { SectionCards } from "@/components/main/dashboard/dashboard-section-card
 
 const DashboardPage = () => {
   return (
-    <>
-      <SectionCards />
-      <div className="px-4 lg:px-6">
+    <div className="w-[90%] m-auto">
+      <div className="mb-4">
+        <SectionCards />
+      </div>
+      <div className="">
         <ChartAreaInteractive />
       </div>
-    </>
+    </div>
   );
 };
 

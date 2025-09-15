@@ -1,4 +1,6 @@
-import React, { ReactNode, useState } from "react";
+"use client";
+
+import React, { ReactNode, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -34,13 +36,17 @@ export interface Props {
 }
 
 const facebookInteractionSchema = z.object({
-  post_url: z.string().url().min(1, "El enlace es requerido"),
+  post_url: z
+    .string()
+    .url("Por favor ingresa un enlace válido")
+    .min(1, "El enlace es requerido"),
   title_post: z.string().optional(),
   liked: z.boolean().optional(),
   comment: z.string().optional(),
   share_groups_count: z
-    .number()
-    .min(0, "El número de grupos a compartir, no puede ser menor que 0.")
+    .number({ invalid_type_error: "Debe ser un número" })
+    .min(0, "El número de grupos a compartir no puede ser negativo.")
+    .max(10, "No puedes compartir en más de 10 grupos.")
     .optional(),
 });
 
@@ -58,9 +64,23 @@ const CreateInteractionFacebookForm = ({ loadData, trigger }: Props) => {
       title_post: "",
       liked: false,
       comment: "",
-      share_groups_count: 0,
+      share_groups_count: undefined,
     },
   });
+
+  // Efectos
+  // Resetear formulario al cerrar el modal
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset({
+        post_url: "",
+        title_post: "",
+        liked: false,
+        comment: "",
+        share_groups_count: undefined,
+      });
+    }
+  }, [isOpen, form]);
 
   const onSubmit = async (
     scheduledFacebookDataForm: FacebookInteractionForm
@@ -195,24 +215,28 @@ const CreateInteractionFacebookForm = ({ loadData, trigger }: Props) => {
                   name="share_groups_count"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cantidad de grupos a compartir</FormLabel>
+                      <FormLabel>
+                        ¿En cuántos grupos deseas compartir esta publicación?
+                      </FormLabel>
                       <FormControl>
                         <Input
                           id="share_groups_count"
                           type="number"
-                          placeholder="100"
+                          placeholder="Ingresa la cantidad de grupos"
                           value={field.value ?? ""}
                           onChange={(e) =>
                             field.onChange(
                               e.target.value === ""
                                 ? undefined
-                                : Number(e.target.value)
+                                : Math.min(Number(e.target.value), 10)
                             )
                           }
+                          max={10}
                         />
                       </FormControl>
                       <FormDescription>
-                        No exceder mas de 5 grupos por interacción
+                        Puedes compartir en un máximo de <b>10 grupos</b>. Te
+                        recomendamos no exceder <b>5 grupos por interacción</b>.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

@@ -41,10 +41,13 @@ export interface Props {
 }
 
 const tiktokInteractionSchema = z.object({
-  video_url: z.string().url().min(1, "El enlace es requerido"),
+  video_url: z
+    .string()
+    .url("Por favor ingresa un enlace válido")
+    .min(1, "El enlace es requerido"),
   views_count: z
-    .number()
-    .min(0, "El número de vistas no puede ser menor que 0.")
+    .number({ invalid_type_error: "Debe ser un número" })
+    .min(0, "El número de vistas no puede ser negativo.")
     .optional(),
   liked: z.boolean().optional(),
   saved: z.boolean().optional(),
@@ -64,7 +67,7 @@ const CreateInteractionTiktokForm = ({ loadData, trigger }: Props) => {
     resolver: zodResolver(tiktokInteractionSchema),
     defaultValues: {
       video_url: "",
-      views_count: 0,
+      views_count: undefined,
       liked: false,
       saved: false,
       shared_on_facebook: false,
@@ -72,30 +75,45 @@ const CreateInteractionTiktokForm = ({ loadData, trigger }: Props) => {
     },
   });
 
+  const videoUrl = form.watch("video_url");
+
   // 5. Efectos
+  // Resetear formulario al cerrar el modal
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset({
+        video_url: "",
+        views_count: undefined,
+        liked: false,
+        saved: false,
+        shared_on_facebook: false,
+        comment: "",
+      });
+      setPreview(null); // limpiar previsualización
+    }
+  }, [isOpen, form]);
+
   //Efecto para actualizar la previsualización al cambiar el link
   useEffect(() => {
-    const subscription = form.watch(async (value) => {
-      const url = value.video_url;
+    if (!videoUrl) {
+      setPreview(null);
+      return;
+    }
 
-      if (!url) {
-        setPreview(null);
-        return;
-      }
-
-      const previewData = await fetchTikTokPreview(url);
-
+    const fetchPreview = async () => {
+      const previewData = await fetchTikTokPreview(videoUrl);
       if (!previewData.ok) {
-        toast(previewData.message || "Error al obtener la previsualización");
+        toast.error(
+          previewData.message || "Error al obtener la previsualizacion"
+        );
         setPreview(null);
         return;
       }
-
       setPreview(previewData.data);
-    });
+    };
 
-    return () => subscription.unsubscribe();
-  }, [form]);
+    fetchPreview();
+  }, [videoUrl]);
 
   const onSubmit = async (scheduledTiktokDataForm: TikTokInteractionForm) => {
     console.log("Datos de la interaccion de tiktok:", scheduledTiktokDataForm);
@@ -245,7 +263,7 @@ const CreateInteractionTiktokForm = ({ loadData, trigger }: Props) => {
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>alguna descripcion</FormDescription>
+                      <FormDescription>Alguna descripción</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -263,7 +281,7 @@ const CreateInteractionTiktokForm = ({ loadData, trigger }: Props) => {
                         <Input
                           id="tiktok-views"
                           type="number"
-                          placeholder="100"
+                          placeholder="Ingresa un número"
                           value={field.value ?? ""}
                           onChange={(e) =>
                             field.onChange(
@@ -274,7 +292,10 @@ const CreateInteractionTiktokForm = ({ loadData, trigger }: Props) => {
                           }
                         />
                       </FormControl>
-                      <FormDescription>Alguna descripcion</FormDescription>
+                      <FormDescription>
+                        Define la cantidad de vistas que quieres generar a tu
+                        publicación.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

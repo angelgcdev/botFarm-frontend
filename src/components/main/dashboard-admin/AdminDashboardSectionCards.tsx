@@ -4,59 +4,47 @@ import { Eye, Forward, Heart, MessageCircle, Smartphone } from "lucide-react";
 import { TikTokIcon } from "../../icons/tiktok-icon";
 import { FacebookIcon } from "../../icons/facebook-icon";
 
-import {
-  getTotalFacebookCommentsForPersonal,
-  getTotalFacebookInteractionsForPersonal,
-  getTotalFacebookLikesForPersonal,
-  getTotalFacebookSharesForPersonal,
-  getTotalTiktokCommentsForPersonal,
-  getTotalTiktokInteractionsForPersonal,
-  getTotalTiktokLikesForPersonal,
-  getTotalTiktokSharesForPersonal,
-  getTotalTiktokViewsForPersonal,
-} from "@/app/main/dashboard/api";
 import { useEffect, useState } from "react";
 import { useDevices } from "@/context/DevicesContext";
-import DashboardCard from "./DashboardCard";
+import AdminDashboardCards from "./AdminDashboardCards";
+import {
+  getTotalFacebookComments,
+  getTotalFacebookInteractions,
+  getTotalFacebookLikes,
+  getTotalFacebookShares,
+  getTotalTiktokComments,
+  getTotalTiktokInteractions,
+  getTotalTiktokLikes,
+  getTotalTiktokShares,
+  getTotalTiktokViews,
+} from "@/app/main/dashboard-admin/api";
 
-export function SectionCards() {
+const AdminDashboardSectionCards = () => {
   // Estados
   // Interacciones
-  const [
-    totalTiktokInteractionsForPersonal,
-    setTotalTiktokInteractionsForPersonal,
-  ] = useState<number>(0);
+  const [totalTiktokInteractions, setTotalTiktokInteractions] =
+    useState<number>(0);
 
-  const [
-    totalFacebookInteractionsForPersonal,
-    setTotalFacebookInteractionsForPersonal,
-  ] = useState<number>(0);
+  const [totalFacebookInteractions, setTotalFacebookInteractions] =
+    useState<number>(0);
 
   // Vistas
-  const [totalTiktokViewsForPersonal, setTotalTiktokViewsForPersonal] =
-    useState(0);
+  const [totalTiktokViewsForAdmin, setTotalTiktokViewsForAdmin] = useState(0);
 
   //Likes
-  const [totalTiktokLikesForPersonal, setTotalTiktokLikesForPersonal] =
-    useState(0);
+  const [totalTiktokLikes, setTotalTiktokLikes] = useState(0);
 
-  const [totalFacebookLikesForPersonal, setTotalFacebookLikesForPersonal] =
-    useState(0);
+  const [totalFacebookLikes, setTotalFacebookLikes] = useState(0);
 
   // Comentarios
-  const [totalTiktokCommentsForPersonal, setTotalTiktokCommentsForPersonal] =
-    useState(0);
-  const [
-    totalFacebookCommentsForPersonal,
-    setTotalFacebookCommentsForPersonal,
-  ] = useState(0);
+  const [totalTiktokComments, setTotalTiktokComments] = useState(0);
+
+  const [totalFacebookComments, setTotalFacebookComments] = useState(0);
 
   // Compartidas
-  const [totalTiktokSharesForPersonal, setTotalTiktokSharesForPersonal] =
-    useState(0);
+  const [totalTiktokShares, setTotalTiktokShares] = useState(0);
 
-  const [totalFacebookSharesForPersonal, setTotalFacebookSharesForPersonal] =
-    useState(0);
+  const [totalFacebookShares, setTotalFacebookShares] = useState(0);
 
   const { devices } = useDevices();
 
@@ -69,155 +57,151 @@ export function SectionCards() {
     const fetchData = async () => {
       try {
         //interacciones
-        const resTotal = await getTotalTiktokInteractionsForPersonal();
-        if (!resTotal.ok) {
-          console.error("Error:", resTotal.message);
+        const resTotalTiktokInteractions = await getTotalTiktokInteractions();
+        if (!resTotalTiktokInteractions.ok) {
+          console.error("Error:", resTotalTiktokInteractions.message);
         }
-        setTotalTiktokInteractionsForPersonal(resTotal.data);
+        setTotalTiktokInteractions(resTotalTiktokInteractions.data);
 
         const resTotalFacebookInteractions =
-          await getTotalFacebookInteractionsForPersonal();
+          await getTotalFacebookInteractions();
         if (!resTotalFacebookInteractions.ok) {
           console.error("Error:", resTotalFacebookInteractions.message);
         }
-        setTotalFacebookInteractionsForPersonal(
-          resTotalFacebookInteractions.data
-        );
+        setTotalFacebookInteractions(resTotalFacebookInteractions.data);
 
         // views
-        const resTotalViews = await getTotalTiktokViewsForPersonal();
+        const resTotalViews = await getTotalTiktokViews();
         if (!resTotalViews.ok) {
           console.error("Error:", resTotalViews.message);
         }
-        setTotalTiktokViewsForPersonal(resTotalViews.data);
+        setTotalTiktokViewsForAdmin(resTotalViews.data);
 
         // likes
-        const resTotalLikes = await getTotalTiktokLikesForPersonal();
+        const resTotalLikes = await getTotalTiktokLikes();
         if (!resTotalLikes.ok) {
           console.error("Error:", resTotalLikes.message);
         }
-        setTotalTiktokLikesForPersonal(resTotalLikes.data);
+        setTotalTiktokLikes(resTotalLikes.data);
 
-        const resTotalFacebookLikes = await getTotalFacebookLikesForPersonal();
+        const resTotalFacebookLikes = await getTotalFacebookLikes();
         if (!resTotalFacebookLikes.ok) {
           console.error("Error:", resTotalFacebookLikes.message);
         }
-        setTotalFacebookLikesForPersonal(resTotalFacebookLikes.data);
+        setTotalFacebookLikes(resTotalFacebookLikes.data);
 
         // comments
-        const resTotalComments = await getTotalTiktokCommentsForPersonal();
+        const resTotalComments = await getTotalTiktokComments();
         if (!resTotalComments.ok) {
           console.error("Error:", resTotalComments.message);
         }
-        setTotalTiktokCommentsForPersonal(resTotalComments.data);
+        setTotalTiktokComments(resTotalComments.data);
 
-        const resTotalFacebookComments =
-          await getTotalFacebookCommentsForPersonal();
+        const resTotalFacebookComments = await getTotalFacebookComments();
         if (!resTotalFacebookComments.ok) {
           console.error("Error:", resTotalFacebookComments.message);
         }
-        setTotalFacebookCommentsForPersonal(resTotalFacebookComments.data);
+        setTotalFacebookComments(resTotalFacebookComments.data);
 
         // Compartidas
-        const resTotalShares = await getTotalTiktokSharesForPersonal();
+        const resTotalShares = await getTotalTiktokShares();
         if (!resTotalShares.ok) {
           console.error("Error:", resTotalShares.message);
         }
-        setTotalTiktokSharesForPersonal(resTotalShares.data);
+        setTotalTiktokShares(resTotalShares.data);
 
-        const resTotalFacebookShares =
-          await getTotalFacebookSharesForPersonal();
+        const resTotalFacebookShares = await getTotalFacebookShares();
         if (!resTotalFacebookShares.ok) {
           console.error("Error:", resTotalFacebookShares.message);
         }
-        setTotalFacebookSharesForPersonal(resTotalFacebookShares.data);
+        setTotalFacebookShares(resTotalFacebookShares.data);
       } catch (error) {
         console.error("Error al obtener los datos:", error);
-        setTotalTiktokInteractionsForPersonal(0);
+        setTotalTiktokInteractions(0);
       }
     };
 
     fetchData();
   }, []);
 
-  console.log("total:", totalFacebookCommentsForPersonal);
+  console.log("total Admin:", totalFacebookShares);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <DashboardCard
+      <AdminDashboardCards
         title="Dispositivos Conectados"
         icon={Smartphone}
         socialMediaIcon={TikTokIcon}
         value={activeDevices.length}
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Interacciones Realizadas en Tiktok"
-        value={totalTiktokInteractionsForPersonal}
+        value={totalTiktokInteractions}
         socialMediaIcon={TikTokIcon}
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Vistas Generadas"
-        value={totalTiktokViewsForPersonal}
+        value={totalTiktokViewsForAdmin}
         icon={Eye}
         socialMediaIcon={TikTokIcon}
         description="Vistas totales en videos de TikTok"
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Likes automáticos realizados"
-        value={totalTiktokLikesForPersonal}
+        value={totalTiktokLikes}
         icon={Heart}
         socialMediaIcon={TikTokIcon}
         description="Me gusta totales en videos de TikTok"
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Comentarios automaticos realizados"
-        value={totalTiktokCommentsForPersonal}
+        value={totalTiktokComments}
         icon={MessageCircle}
         socialMediaIcon={TikTokIcon}
         description="Comentarios realizados en videos de TikTok"
       />
 
       {/* completar */}
-      <DashboardCard
+      <AdminDashboardCards
         title="Compartidas automáticas realizadas"
-        value={totalTiktokSharesForPersonal}
+        value={totalTiktokShares}
         icon={Forward}
         socialMediaIcon={TikTokIcon}
         description="Compartidas realizados en videos de TikTok"
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Interacciones Realizadas en Facebook"
-        value={totalFacebookInteractionsForPersonal}
+        value={totalFacebookInteractions}
         socialMediaIcon={FacebookIcon}
         className="bg-[#1877F2]/20"
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Likes automáticos realizados"
-        value={totalFacebookLikesForPersonal}
+        value={totalFacebookLikes}
         icon={Heart}
         socialMediaIcon={FacebookIcon}
         description="Likes realizados en publicaciones de Facebook"
         className="bg-[#1877F2]/20"
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Compartidas automáticas realizadas"
-        value={totalFacebookSharesForPersonal}
+        value={totalFacebookShares}
         icon={Forward}
         socialMediaIcon={FacebookIcon}
         description="Compartidas realizadas en publicaciones de Facebook"
         className="bg-[#1877F2]/20"
       />
 
-      <DashboardCard
+      <AdminDashboardCards
         title="Comentarios automáticos realizados"
-        value={totalFacebookCommentsForPersonal}
+        value={totalFacebookComments}
         icon={MessageCircle}
         socialMediaIcon={FacebookIcon}
         description="Comentarios automáticos realizados en publicaciones de Facebook"
@@ -225,4 +209,6 @@ export function SectionCards() {
       />
     </div>
   );
-}
+};
+
+export default AdminDashboardSectionCards;

@@ -21,6 +21,7 @@ import CreateInteractionTiktokForm from "./CreateInteractionTiktokForm";
 import { Plus } from "lucide-react";
 import CreateInteractionFacebookForm from "./CreateInteractionFacebookForm";
 import { ScheduledFacebookInteractions } from "./ScheduledFacebookInteractions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function ScheduleInteractionsForm() {
   // Estados
@@ -64,8 +65,8 @@ export function ScheduleInteractionsForm() {
   }
 
   return (
-    <>
-      <div className="flex gap-4">
+    <div className="flex-col">
+      <div className="flex gap-4 mb-8">
         <CreateInteractionTiktokForm
           loadData={loadData}
           trigger={
@@ -101,16 +102,26 @@ export function ScheduleInteractionsForm() {
         </div>
       ) : (
         <>
-          <ScheduledTiktokInteractions
-            loadData={loadData}
-            scheduledTiktokInteractions={scheduledInteractions.tiktok}
-          />
-          <ScheduledFacebookInteractions
-            loadData={loadData}
-            scheduledFacebookInteractions={scheduledInteractions.facebook}
-          />
+          <Tabs defaultValue="tiktok">
+            <TabsList>
+              <TabsTrigger value="tiktok">Tiktok</TabsTrigger>
+              <TabsTrigger value="facebook">Facebook</TabsTrigger>
+            </TabsList>
+            <TabsContent value="tiktok">
+              <ScheduledTiktokInteractions
+                loadData={loadData}
+                scheduledTiktokInteractions={scheduledInteractions.tiktok}
+              />
+            </TabsContent>
+            <TabsContent value="facebook">
+              <ScheduledFacebookInteractions
+                loadData={loadData}
+                scheduledFacebookInteractions={scheduledInteractions.facebook}
+              />
+            </TabsContent>
+          </Tabs>
         </>
       )}
-    </>
+    </div>
   );
 }

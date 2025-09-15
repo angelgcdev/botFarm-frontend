@@ -62,7 +62,10 @@ export function LoginForm({
 
       //Redirige al dashboard
       // router.push("/main/dashboard");
-      window.location.href = "/main/dashboard";
+      window.location.href =
+        resData.user.role === "ADMINISTRADOR"
+          ? "/main/dashboard-admin"
+          : "/main/dashboard";
     } catch (error) {
       console.error("Error en la solicitud:", error);
     }

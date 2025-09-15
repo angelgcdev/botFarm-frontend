@@ -38,7 +38,7 @@ import {
 } from "@/app/main/schedule-posts/types";
 import Image from "next/image";
 import { fetchTikTokPreview } from "@/app/main/schedule-posts/api";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 
 type Props = {
@@ -48,10 +48,13 @@ type Props = {
 };
 
 const tiktokInteractionSchema = z.object({
-  video_url: z.string().url().min(1, "El enlace es requerido"),
+  video_url: z
+    .string()
+    .url("Por favor ingresa un enlace válido")
+    .min(1, "El enlace es requerido"),
   views_count: z
-    .number()
-    .min(0, "El número de vistas no puede ser menor que 0.")
+    .number({ invalid_type_error: "Debe ser un número" })
+    .min(0, "El número de vistas no puede ser negativo.")
     .optional(),
   liked: z.boolean().optional(),
   saved: z.boolean().optional(),
@@ -75,39 +78,40 @@ function EditModal({ interaction, onEditInteraction, trigger }: Props) {
       views_count: interaction.views_count,
       liked: interaction.liked,
       saved: interaction.saved,
-      shared_on_facebook: interaction.saved,
+      shared_on_facebook: interaction.shared_on_facebook,
       comment: interaction.comment,
     },
   });
 
+  const videoUrl = form.watch("video_url");
+
   // 5. Efectos
   //Efecto para actualizar la previsualización al cambiar el link
   useEffect(() => {
-    const subscription = form.watch(async (value) => {
-      const url = value.video_url;
+    if (!videoUrl) {
+      setPreview(null);
+      return;
+    }
 
-      if (!url) {
-        setPreview(null);
-        return;
-      }
-
-      const previewData = await fetchTikTokPreview(url);
-
+    const fetchPreview = async () => {
+      const previewData = await fetchTikTokPreview(videoUrl);
       if (!previewData.ok) {
-        toast(previewData.message || "Error al obtener la previsualización");
+        // toast.error(
+        //   previewData.message || "Error al obtener la previsualizacion"
+        // );
         setPreview(null);
         return;
       }
-
       setPreview(previewData.data);
-    });
+    };
 
-    return () => subscription.unsubscribe();
-  }, [form]);
+    fetchPreview();
+  }, [videoUrl]);
 
   const onSubmit = async (interactionEdited: TikTokInteractionForm) => {
     onEditInteraction(interaction.id, interactionEdited);
     setOpen(false); // Cierra el modal
+    form.reset();
   };
 
   return (
@@ -250,7 +254,7 @@ function EditModal({ interaction, onEditInteraction, trigger }: Props) {
                         <Input
                           id="tiktok-views"
                           type="number"
-                          placeholder="100"
+                          placeholder="50"
                           value={field.value ?? ""}
                           onChange={(e) =>
                             field.onChange(

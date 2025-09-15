@@ -61,6 +61,7 @@ export function SocialAccountFormModal({
   const [socialMediaData, setSocialMediaData] = useState<SocialNetwork[]>([]);
 
   const {
+    reset,
     register,
     handleSubmit,
     control,
@@ -132,6 +133,8 @@ export function SocialAccountFormModal({
 
     // cerrar el modal
     setIsOpen(false);
+
+    reset();
   });
 
   return (

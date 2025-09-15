@@ -8,6 +8,7 @@ import {
   CalendarRange,
   Shield,
   ChartSpline,
+  Users,
 } from "lucide-react";
 // import { NavSecondary } from "./nav-secondary";
 import { MainNavUser } from "./main-nav-user";
@@ -47,6 +48,11 @@ const data = {
       url: "/main/history",
       icon: ClockIcon,
     },
+    {
+      title: "Clientes y Ventas",
+      url: "/main/clientes-ventas",
+      icon: Users,
+    },
   ],
 };
 
@@ -66,10 +72,18 @@ export function MainSidebar({
     const role = localStorage.getItem("role");
     if (role === "ADMINISTRADOR") {
       setNavItems([
-        ...data.navMain,
+        ...data.navMain.map((item) =>
+          item.title === "Dashboard"
+            ? {
+                ...item,
+                title: "Dashboard Admin",
+                url: "/main/dashboard-admin",
+              }
+            : item
+        ),
         {
           title: "Panel de administración",
-          url: "/admin/dashboard",
+          url: "/admin/usuarios",
           icon: Shield,
         },
       ]);
@@ -90,7 +104,9 @@ export function MainSidebar({
               <div className="flex w-8 h-8 bg-primary rounded-lg items-center justify-center">
                 <BarChart3 className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">Bots Redes Sociales</span>
+              <span className="text-lg font-semibold">
+                Bots de Redes Sociales
+              </span>
               <ModeToggle />
             </div>
           </SidebarMenuItem>

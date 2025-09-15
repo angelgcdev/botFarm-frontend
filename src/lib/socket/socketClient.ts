@@ -24,6 +24,7 @@ export function iniciarSocketClient(user_id: number): Socket | null {
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
 
   socket = io(backendUrl, {
+    transports: ["websocket"],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 2000,

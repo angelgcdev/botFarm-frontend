@@ -259,8 +259,8 @@ const ScheduledFacebookInteractions = ({
           <CardHeader className="flex items-center justify-between ">
             <CardTitle className="text-lg font-semibold ">
               <div className="flex gap-2 items-center">
-                Interacción
                 <FacebookIcon className="text-[#1877F2]" />
+                Interacción
               </div>
             </CardTitle>
             {renderStatusBadge(interaction.status)}
