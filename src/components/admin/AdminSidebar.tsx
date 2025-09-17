@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, ArrowLeft } from "lucide-react";
+import { Users, ArrowLeft, ChartSpline } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,12 +15,12 @@ import Link from "next/link";
 
 const data = {
   navMain: [
-    // {
-    //   title: "Dashboard General",
-    //   url: "/admin/dashboard",
-    //   icon: ChartSpline,
-    //   isActive: true,
-    // },
+    {
+      title: "Dashboard General",
+      url: "/admin/dashboard",
+      icon: ChartSpline,
+      isActive: true,
+    },
     {
       title: "Usuarios",
       url: "/admin/usuarios",
@@ -38,7 +38,7 @@ export function AdminSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center justify-between">
-            <Link href="/main/dashboard-admin">
+            <Link href="/main/dashboard">
               <SidebarMenuButton>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 <span className="text-lg font-semibold">Volver</span>

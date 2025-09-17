@@ -3,6 +3,7 @@
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminSiteHeader } from "@/components/admin/AdminSiteHeader";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { DevicesProvider } from "@/context/DevicesContext";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -44,20 +45,22 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   if (!roleChecked) return <div>Cargando...</div>; // Evita mostrar el layout hasta verificar
 
   return (
-    <SidebarProvider>
-      <AdminSidebar variant="inset" />
+    <DevicesProvider>
+      <SidebarProvider>
+        <AdminSidebar variant="inset" />
 
-      <SidebarInset>
-        <AdminSiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {children}
+        <SidebarInset>
+          <AdminSiteHeader />
+          <div className="flex flex-1 flex-col">
+            <div className="@container/main flex flex-1 flex-col gap-2">
+              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                {children}
+              </div>
             </div>
           </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+    </DevicesProvider>
   );
 };
 

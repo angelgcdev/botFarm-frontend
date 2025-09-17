@@ -72,18 +72,10 @@ export function MainSidebar({
     const role = localStorage.getItem("role");
     if (role === "ADMINISTRADOR") {
       setNavItems([
-        ...data.navMain.map((item) =>
-          item.title === "Dashboard"
-            ? {
-                ...item,
-                title: "Dashboard Admin",
-                url: "/main/dashboard-admin",
-              }
-            : item
-        ),
+        ...data.navMain,
         {
           title: "Panel de administración",
-          url: "/admin/usuarios",
+          url: "/admin/dashboard",
           icon: Shield,
         },
       ]);

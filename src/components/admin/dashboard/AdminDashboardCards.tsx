@@ -1,4 +1,4 @@
-import { AdminDashboardCardProps } from "@/app/main/dashboard-admin/types";
+import { AdminDashboardCardProps } from "@/app/admin/dashboard/types";
 import React from "react";
 import {
   Card,

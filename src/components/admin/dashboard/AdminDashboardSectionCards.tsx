@@ -17,7 +17,7 @@ import {
   getTotalTiktokLikes,
   getTotalTiktokShares,
   getTotalTiktokViews,
-} from "@/app/main/dashboard-admin/api";
+} from "@/app/admin/dashboard/api";
 
 const AdminDashboardSectionCards = () => {
   // Estados
